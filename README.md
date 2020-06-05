@@ -1,4 +1,22 @@
-# [DMTCP: Distributed MultiThreaded CheckPointing](http://dmtcp.sourceforge.net/) [![Build Status](https://travis-ci.org/dmtcp/dmtcp.png?branch=master)](https://travis-ci.org/dmtcp/dmtcp)
+# CRAC: Checkpoint-Restart Architecture for CUDA Streams and UVM
+
+## Table of Contents
+
+* [Introduction](#introduction)
+* [TODO](#todo)
+* [DMTCP](#dmtcp)
+
+## Introduction
+This is a new DMTCP(https://github.com/dmtcp/dmtcp.git) plugin to checkpoint-
+restart CUDA application with noval split-process architecture.
+
+## TODO
+We are in the process of porting our code that is developed for the cluster's
+specific environment to make it more general.
+
+
+## DMTCP: Distributed MultiThreaded CheckPointing 
+(http://dmtcp.sourceforge.net/) [![Build Status](https://travis-ci.org/dmtcp/dmtcp.png?branch=master)](https://travis-ci.org/dmtcp/dmtcp)
 
 DMTCP is a tool to transparently checkpoint the state of multiple simultaneous
 applications, including multi-threaded and distributed applications. It
