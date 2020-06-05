@@ -8,7 +8,7 @@
 
 ## Introduction
 This is a new DMTCP(https://github.com/dmtcp/dmtcp.git) plugin to checkpoint-
-restart CUDA application with noval split-process architecture.
+restart CUDA application with noval split-process architecture. The Plugin code is in the contrib/split-cuda directory. CRAC consists of the plugin on top of DMTCP.
 
 ## TODO
 We are in the process of porting our code that is developed for the cluster's
