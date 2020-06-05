@@ -1,0 +1,2280 @@
+#include <errno.h>;
+#include <fcntl.h>;
+#include <stdio.h>;
+#include <stdint.h>;
+#include <stdlib.h>;
+#include <unistd.h>;
+#include <sys/mman.h>;
+#include <sys/stat.h>;
+#include <sys/types.h>;
+
+#include <cuda.h>;
+#include <cuda_runtime.h>;
+#include <cuda_runtime_api.h>;
+
+#include "common.h";
+#include "switch_context.h";
+#include "upper-half-wrappers.h";
+#include "upper-half-cuda-wrappers.h";
+#include "cuda_autogen_wrappers.h";
+#include "log_and_replay.h";
+
+/* ------------ Cuda APIs ------------- */;
+
+@LogReplay;
+cudaError_t
+cudaCreateTextureObject(cudaTextureObject_t * pTexObject,
+                        const struct cudaResourceDesc * pResDesc,
+                        const struct cudaTextureDesc * pTexDesc,
+                        const struct cudaResourceViewDesc * pResViewDesc);
+
+@LogReplay;
+cudaError_t
+cudaDestroyTextureObject(cudaTextureObject_t texObject);
+
+cudaError_t
+cudaBindTexture ( size_t* offset, const textureReference* texref,
+    const void* devPtr, const cudaChannelFormatDesc* desc, size_t size);
+
+cudaError_t
+cudaBindTexture2D ( size_t* offset, const textureReference* texref,
+  const void* devPtr, const cudaChannelFormatDesc* desc, size_t width,
+  size_t height, size_t pitch );
+
+/* @LogReplay */;
+cudaError_t
+cudaBindTextureToArray ( const textureReference* texref,
+    cudaArray_const_t array, const cudaChannelFormatDesc* desc );
+
+/* @LogReplay */;
+cudaError_t
+cudaUnbindTexture(const struct textureReference * texref);
+
+
+@LogReplay;
+cudaChannelFormatDesc
+cudaCreateChannelDesc ( int  x, int  y, int  z, int  w,
+    cudaChannelFormatKind f );
+
+/* Cuda event related APIs */;
+
+@LogReplay;
+cudaError_t
+cudaEventCreate(cudaEvent_t * event);
+
+@LogReplay;
+cudaError_t
+cudaEventCreateWithFlags(cudaEvent_t * event, unsigned int flags);
+
+@LogReplay;
+cudaError_t
+cudaEventDestroy(cudaEvent_t event);
+
+cudaError_t
+cudaEventElapsedTime(float * ms, cudaEvent_t start, cudaEvent_t end);
+
+cudaError_t
+cudaEventQuery(cudaEvent_t event);
+
+cudaError_t
+cudaEventRecord(cudaEvent_t event, cudaStream_t stream);
+
+cudaError_t
+cudaEventSynchronize(cudaEvent_t event);
+
+/* ----- Malloc and Free related APIs ----- */;
+
+@LogReplay;
+cudaError_t
+cudaMalloc(void ** pointer, size_t size);
+
+@LogReplay;
+cudaError_t
+cudaFree ( void * pointer );
+
+/* @LogReplay */;
+cudaError_t
+cudaMallocArray(struct cudaArray ** array,
+                const struct cudaChannelFormatDesc * desc,
+                size_t width, size_t height, unsigned int flags);
+
+/* @LogReplay */;
+cudaError_t
+cudaFreeArray(struct cudaArray * array);
+
+
+/* Host related APIs */;
+
+cudaError_t
+cudaHostRegister ( void* ptr, size_t size, unsigned int  flags );
+
+cudaError_t
+cudaDeviceGetAttribute ( int* value, cudaDeviceAttr attr, int  device );
+
+/* @LogReplay */;
+cudaError_t
+cudaMallocHost ( void ** ptr , size_t size );
+
+/* @LogReplay */;
+cudaError_t
+cudaFreeHost ( void* ptr );
+
+/* @LogReplay */;
+cudaError_t
+cudaHostAlloc ( void ** ptr , size_t size , unsigned int flags );
+
+/* @LogReplay */;
+cudaError_t
+cudaMallocPitch(void ** devPtr, size_t * pitch, size_t width, size_t height);
+
+/* Device related APIs */;
+cudaError_t
+cudaGetDevice(int * device);
+
+cudaError_t
+cudaSetDevice(int device);
+
+cudaError_t
+cudaDeviceGetLimit ( size_t* pValue, cudaLimit limit );
+
+cudaError_t
+cudaDeviceSetLimit ( cudaLimit limit, size_t value );
+
+cudaError_t
+cudaGetDeviceCount(int * count);
+
+cudaError_t
+cudaDeviceSetCacheConfig ( cudaFuncCache cacheConfig );
+
+cudaError_t
+cudaGetDeviceProperties ( cudaDeviceProp* prop, int  device );
+
+cudaError_t
+cudaDeviceCanAccessPeer(int * canAccessPeer, int device, int peerDevice);
+
+cudaError_t
+cudaDeviceGetPCIBusId(char * pciBusId, int len, int device);
+
+/* @LogReplay */;
+cudaError_t
+cudaDeviceReset();
+
+cudaError_t
+cudaDeviceSynchronize();
+
+/*
+  Launches a device function
+  Note: This function is deprecated as of CUDA 7.0
+*/;
+/*
+cudaError_t
+cudaLaunch(const void * func)*/;
+
+cudaError_t
+cudaLaunchKernel ( const void* func, dim3 gridDim, dim3 blockDim,
+    void** args, size_t sharedMem, cudaStream_t stream );
+
+/*
+cudaError_t
+cudaConfigureCall(dim3 gridDim, dim3 blockDim, size_t sharedMem,
+                  cudaStream_t stream)*/;
+
+
+/*
+  Cuda UVM APIs
+*/;
+@LogReplay;
+cudaError_t
+cudaMallocManaged ( void** devPtr, size_t size, unsigned int  flags);
+
+/*
+  Cuda Memory management realated APIs
+*/;
+cudaError_t
+cudaMemcpy ( void* dst, const void* src,
+                         size_t count, cudaMemcpyKind kind );
+
+cudaError_t
+cudaMemcpy2D ( void* dst, size_t dpitch, const void* src, size_t spitch,
+  size_t width, size_t height, cudaMemcpyKind kind );
+
+cudaError_t
+cudaMemcpyToArray (cudaArray_t dst, size_t wOffset, size_t hOffset,
+                               const void* src, size_t count,
+                               cudaMemcpyKind kind );
+
+cudaError_t
+cudaMemcpyToSymbol ( const void* symbol, const void* src,
+                                 size_t count, size_t offset,
+                                 cudaMemcpyKind kind);
+
+cudaError_t
+cudaMemcpyAsync ( void* dst, const void* src, size_t count, cudaMemcpyKind kind, cudaStream_t stream);
+
+cudaError_t
+cudaMemset(void * devPtr, int value, size_t count);
+
+cudaError_t
+cudaMemset2D ( void* devPtr, size_t pitch, int value, size_t width,
+  size_t height );
+
+cudaError_t
+cudaMemsetAsync(void * devPtr, int value, size_t count, cudaStream_t stream);
+
+cudaError_t
+cudaMemGetInfo(size_t * free, size_t * total);
+
+cudaError_t
+cudaMemAdvise(const void * devPtr, size_t count, enum cudaMemoryAdvise advice,
+              int device);
+
+cudaError_t
+cudaMemPrefetchAsync(const void * devPtr, size_t count, int dstDevice,
+                     cudaStream_t stream);
+
+/*
+cudaError_t
+cudaSetupArgument(const void * arg, size_t size, size_t offset)*/;
+
+/* ---- Cuda Stream related APIs ---- */;
+
+@LogReplay;
+cudaError_t
+cudaStreamCreate(cudaStream_t * pStream);
+
+@LogReplay;
+cudaError_t
+cudaStreamCreateWithPriority ( cudaStream_t* pStream, unsigned int  flags, int  priority );
+
+@LogReplay;
+cudaError_t
+cudaStreamCreateWithFlags(cudaStream_t * pStream, unsigned int flags);
+
+
+@LogReplay;
+cudaError_t
+cudaStreamDestroy(cudaStream_t stream);
+
+cudaError_t
+cudaStreamSynchronize(cudaStream_t stream);
+
+cudaError_t
+cudaStreamWaitEvent(cudaStream_t stream, cudaEvent_t event, unsigned int flags);
+
+/*
+  Thread related APIs (deprecated)
+*/;
+cudaError_t
+cudaThreadSynchronize ();
+
+cudaError_t
+cudaThreadExit ();
+
+/*
+  Miscellaneous API
+*/;
+cudaError_t
+cudaPointerGetAttributes ( cudaPointerAttributes* attributes,
+                                       const void* ptr );
+
+const char*
+cudaGetErrorString ( cudaError_t error );
+
+const char*
+cudaGetErrorName ( cudaError_t error );
+
+cudaError_t
+cudaGetLastError();
+
+cudaError_t
+cudaPeekAtLastError();
+
+cudaError_t
+cudaFuncSetCacheConfig ( const void* func, cudaFuncCache cacheConfig );
+
+/* ---------- CUDART INTERNAL APIs ----------- */;
+@LogReplay;
+char
+__cudaInitModule(void **fatCubinHandle);
+
+@LogReplay;
+cudaError_t
+__cudaPopCallConfiguration(
+  dim3 *gridDim,
+  dim3 *blockDim,
+  size_t *sharedMem,
+  void *stream
+);
+
+@LogReplay;
+unsigned int
+__cudaPushCallConfiguration(
+  dim3 gridDim,
+  dim3 blockDim,
+  size_t sharedMem,
+  void * stream
+);
+
+@LogReplay;
+void**
+__cudaRegisterFatBinary(void *fatCubin);
+
+@LogReplay;
+void
+__cudaUnregisterFatBinary(void **fatCubinHandle);
+
+@LogReplay;
+void
+__cudaRegisterFunction(
+        void **fatCubinHandle,
+  const char *hostFun,
+        char *deviceFun,
+  const char *deviceName,
+        int thread_limit,
+        uint3 *tid,
+        uint3 *bid,
+        dim3 *bDim,
+        dim3 *gDim,
+        int *wSize
+);
+
+@LogReplay;
+void
+__cudaRegisterManagedVar(
+        void **fatCubinHandle,
+        void **hostVarPtrAddress,
+        char  *deviceAddress,
+  const char  *deviceName,
+        int    ext,
+        size_t size,
+        int    constant,
+        int    global
+);
+
+@LogReplay;
+void
+__cudaRegisterTexture(
+        void  **fatCubinHandle,
+  const struct textureReference  *hostVar,
+  const void **deviceAddress,
+  const char *deviceName,
+        int dim,
+        int norm,
+        int ext
+);
+
+@LogReplay;
+void
+__cudaRegisterSurface(
+        void **fatCubinHandle,
+  const struct surfaceReference  *hostVar,
+  const void **deviceAddress,
+  const char *deviceName,
+        int dim,
+        int ext
+);
+
+@LogReplay;
+void
+__cudaRegisterVar(void **fatCubinHandle, char *hostVar,
+  char  *deviceAddress, const char  *deviceName, int ext, size_t size,
+  int constant, int global);
+
+cudaError_t
+cudaOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, const void* func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags );
+
+cudaError_t cudaFuncGetAttributes(struct cudaFuncAttributes *attr, const void *func);
+
+/* ----------- CUBLAS APIs ------------ */;
+
+@LogReplay;
+cublasStatus_t
+cublasCreate_v2(cublasHandle_t * handle);
+
+cublasStatus_t
+cublasSetStream_v2(cublasHandle_t handle, cudaStream_t streamId);
+
+cublasStatus_t
+cublasDdot_v2(cublasHandle_t handle, int n, const double * x, int incx,
+  const double * y, int incy, double * result);
+
+@LogReplay;
+cublasStatus_t
+cublasDestroy_v2(cublasHandle_t handle);
+
+cublasStatus_t
+cublasDaxpy_v2(cublasHandle_t handle, int n, const double * alpha,
+  const double * x, int incx, double * y, int incy);
+
+cublasStatus_t
+cublasDasum_v2(cublasHandle_t handle,
+              int n,
+              const double *x,
+              int incx,
+              double *result);
+
+cublasStatus_t
+cublasDgemm_v2 (cublasHandle_t handle,
+                cublasOperation_t transa,
+                cublasOperation_t transb,
+                int m,
+                int n,
+                int k,
+                const double *alpha,
+                const double *A,
+                int lda,
+                const double *B,
+                int ldb,
+                const double *beta,
+                double *C,
+                int ldc);
+
+cublasStatus_t
+cublasDgemv_v2 (cublasHandle_t handle,
+                cublasOperation_t trans,
+                int m,
+                int n,
+                const double *alpha,
+                const double *A,
+                int lda,
+                const double *x,
+                int incx,
+                const double *beta,
+                double *y,
+                int incy);
+
+cublasStatus_t
+cublasDnrm2_v2(cublasHandle_t handle,
+              int n,
+              const double *x,
+              int incx,
+              double *result);
+
+cublasStatus_t
+cublasDscal_v2(cublasHandle_t handle,
+              int n,
+              const double *alpha,
+              double *x,
+              int incx);
+cublasStatus_t
+cublasDswap_v2 (cublasHandle_t handle,
+                int n,
+                double *x,
+                int incx,
+                double *y,
+                int incy);
+cublasStatus_t
+cublasIdamax_v2(cublasHandle_t handle,
+                int n,
+                const double *x,
+                int incx,
+                int *result);
+
+/* ----------- CUSPARSE APIs ------------ */;
+
+@LogReplay;
+cusparseStatus_t
+cusparseCreate(cusparseHandle_t *handle);
+
+cusparseStatus_t
+cusparseSetStream(cusparseHandle_t handle, cudaStream_t streamId);
+
+@LogReplay;
+cusparseStatus_t
+cusparseCreateMatDescr(cusparseMatDescr_t *descrA);
+
+cusparseStatus_t
+cusparseSetMatType(cusparseMatDescr_t descrA, cusparseMatrixType_t type);
+
+cusparseStatus_t
+cusparseSetMatIndexBase(cusparseMatDescr_t descrA, cusparseIndexBase_t base);
+
+@LogReplay;
+cusparseStatus_t
+cusparseDestroy(cusparseHandle_t handle);
+
+@LogReplay;
+cusparseStatus_t
+cusparseDestroyMatDescr (cusparseMatDescr_t descrA);
+
+/* hybrid (HYB) format */;
+@LogReplay;
+cusparseStatus_t
+cusparseCreateHybMat(cusparseHybMat_t *hybA);
+
+@LogReplay;
+cusparseStatus_t
+cusparseDestroyHybMat(cusparseHybMat_t hybA);
+
+/* sparse triangular solve and incomplete-LU and Cholesky (algorithm 1) */;
+@LogReplay;
+cusparseStatus_t
+cusparseCreateSolveAnalysisInfo(cusparseSolveAnalysisInfo_t *info);
+
+@LogReplay;
+cusparseStatus_t
+cusparseDestroySolveAnalysisInfo(cusparseSolveAnalysisInfo_t info);
+
+cusparseStatus_t
+cusparseDcsr2csc(cusparseHandle_t handle,
+                int m,
+                int n,
+                int nnz,
+                const double  *csrSortedVal,
+                const int *csrSortedRowPtr,
+                const int *csrSortedColInd,
+                double *cscSortedVal,
+                int *cscSortedRowInd,
+                int *cscSortedColPtr,
+                cusparseAction_t copyValues,
+                cusparseIndexBase_t idxBase);
+cusparseStatus_t
+cusparseDcsr2hyb(cusparseHandle_t handle,
+                int m,
+                int n,
+                const cusparseMatDescr_t descrA,
+                const double *csrSortedValA,
+                const int *csrSortedRowPtrA,
+                const int *csrSortedColIndA,
+                cusparseHybMat_t hybA,
+                int userEllWidth,
+                cusparseHybPartition_t partitionType);
+cusparseStatus_t
+cusparseDcsrmv(cusparseHandle_t handle,
+              cusparseOperation_t transA,
+              int m,
+              int n,
+              int nnz,
+              const double *alpha,
+              const cusparseMatDescr_t descrA,
+              const double *csrSortedValA,
+              const int *csrSortedRowPtrA,
+              const int *csrSortedColIndA,
+              const double *x,
+              const double *beta,
+              double *y);
+cusparseStatus_t
+cusparseDcsrsv_analysis(cusparseHandle_t handle,
+                        cusparseOperation_t transA,
+                        int m,
+                        int nnz,
+                        const cusparseMatDescr_t descrA,
+                        const double *csrSortedValA,
+                        const int *csrSortedRowPtrA,
+                        const int *csrSortedColIndA,
+                        cusparseSolveAnalysisInfo_t info);
+
+cusparseStatus_t
+cusparseDcsrsv_solve(cusparseHandle_t handle,
+                    cusparseOperation_t transA,
+                    int m,
+                    const double *alpha,
+                    const cusparseMatDescr_t descrA,
+                    const double *csrSortedValA,
+                    const int *csrSortedRowPtrA,
+                    const int *csrSortedColIndA,
+                    cusparseSolveAnalysisInfo_t info,
+                    const double *f,
+                    double *x);
+cusparseStatus_t
+cusparseDhyb2csr(cusparseHandle_t handle,
+                const cusparseMatDescr_t descrA,
+                const cusparseHybMat_t hybA,
+                double *csrSortedValA,
+                int *csrSortedRowPtrA,
+                int *csrSortedColIndA);
+cusparseStatus_t
+cusparseDhybmv(cusparseHandle_t handle,
+              cusparseOperation_t transA,
+              const double *alpha,
+              const cusparseMatDescr_t descrA,
+              const cusparseHybMat_t hybA,
+              const double *x,
+              const double *beta,
+              double *y);
+
+cusparseMatrixType_t
+cusparseGetMatType(const cusparseMatDescr_t descrA);
+
+cusparseStatus_t
+cusparseSetMatFillMode(cusparseMatDescr_t descrA, cusparseFillMode_t fillMode);
+
+cusparseFillMode_t
+cusparseGetMatFillMode(const cusparseMatDescr_t descrA);
+
+cusparseStatus_t
+cusparseSetMatDiagType(cusparseMatDescr_t  descrA, cusparseDiagType_t diagType);
+
+cusparseDiagType_t
+cusparseGetMatDiagType(const cusparseMatDescr_t descrA);
+
+cusparseIndexBase_t
+cusparseGetMatIndexBase(const cusparseMatDescr_t descrA);
+
+cusparseStatus_t
+cusparseSetPointerMode(cusparseHandle_t handle, cusparsePointerMode_t mode);
+
+
+/* ==== cusolverDn API ==== */;
+@LogReplay;
+cusolverStatus_t
+cusolverDnCreate(cusolverDnHandle_t *handle);
+
+@LogReplay;
+cusolverStatus_t
+cusolverDnDestroy(cusolverDnHandle_t handle);
+
+cusolverStatus_t
+cusolverDnSetStream (cusolverDnHandle_t handle, cudaStream_t streamId);
+
+cusolverStatus_t
+cusolverDnGetStream(cusolverDnHandle_t handle, cudaStream_t *streamId);
+
+cusolverStatus_t
+cusolverDnDgetrf_bufferSize(
+    cusolverDnHandle_t handle,
+    int m,
+    int n,
+    double *A,
+    int lda,
+    int *Lwork );
+
+cusolverStatus_t
+cusolverDnDgetrf(
+    cusolverDnHandle_t handle,
+    int m,
+    int n,
+    double *A,
+    int lda,
+    double *Workspace,
+    int *devIpiv,
+    int *devInfo );
+
+cusolverStatus_t
+cusolverDnDgetrs(
+    cusolverDnHandle_t handle,
+    cublasOperation_t trans,
+    int n,
+    int nrhs,
+    const double *A,
+    int lda,
+    const int *devIpiv,
+    double *B,
+    int ldb,
+    int *devInfo );
+
+cusolverStatus_t
+cusolverDnDpotrf_bufferSize(
+    cusolverDnHandle_t handle,
+    cublasFillMode_t uplo,
+    int n,
+    double *A,
+    int lda,
+    int *Lwork );
+
+cusolverStatus_t
+cusolverDnDpotrf(
+    cusolverDnHandle_t handle,
+    cublasFillMode_t uplo,
+    int n,
+    double *A,
+    int lda,
+    double *Workspace,
+    int Lwork,
+    int *devInfo );
+
+cusolverStatus_t
+cusolverDnDpotrs(
+    cusolverDnHandle_t handle,
+    cublasFillMode_t uplo,
+    int n,
+    int nrhs,
+    const double *A,
+    int lda,
+    double *B,
+    int ldb,
+    int *devInfo);
+
+/* ==== Device APIs ==== */;
+
+/* ==== Initialization ==== */;
+CUresult
+cuInit ( unsigned int  Flags );
+
+/* ==== Version Management ==== */;
+CUresult
+cuDriverGetVersion ( int* driverVersion );
+
+/* Device Management */;
+/* Returns a handle to a compute device. */;
+CUresult
+cuDeviceGet ( CUdevice* device, int  ordinal );
+
+/* Returns information about the device. */;
+CUresult
+cuDeviceGetAttribute ( int* pi, CUdevice_attribute attrib, CUdevice dev );
+
+/* Returns the number of compute-capable devices. */;
+CUresult
+cuDeviceGetCount ( int* count );
+
+/*
+CUresult
+cuDeviceGetLuid ( char* luid, unsigned int* deviceNodeMask, CUdevice dev ) */;
+/* Return an LUID and device node mask for the device. */;
+
+CUresult
+cuDeviceGetName ( char* name, int  len, CUdevice dev );
+/* Returns an identifer string for the device. */;
+
+CUresult
+cuDeviceGetUuid ( CUuuid* uuid, CUdevice dev );
+/* Return an UUID for the device. */;
+
+/* Returns the total amount of memory on the device. */;
+CUresult
+cuDeviceTotalMem_v2 ( size_t* bytes, CUdevice dev );
+
+/* ==== Device Management (deprecated) ==== */;
+
+CUresult
+cuDeviceComputeCapability ( int* major, int* minor, CUdevice dev );
+/* Returns the compute capability of the device. */;
+
+CUresult
+cuDeviceGetProperties ( CUdevprop* prop, CUdevice dev );
+/* Returns properties for a selected device. */;
+
+/* ==== Primary Context Management ==== */;
+
+CUresult
+cuDevicePrimaryCtxGetState ( CUdevice dev, unsigned int* flags, int* active );
+/*
+Get the state of the primary context.
+*/;
+
+CUresult
+cuDevicePrimaryCtxRelease ( CUdevice dev );
+/*
+Release the primary context on the GPU.
+*/;
+
+CUresult
+cuDevicePrimaryCtxReset ( CUdevice dev );
+/*
+Destroy all allocations and reset all state on the primary context.
+*/;
+
+CUresult
+cuDevicePrimaryCtxRetain ( CUcontext* pctx, CUdevice dev );
+/*
+Retain the primary context on the GPU.
+*/;
+
+CUresult
+cuDevicePrimaryCtxSetFlags ( CUdevice dev, unsigned int  flags );
+/*
+Set flags for the primary context.
+*/;
+
+/* ==== Context Management ==== */;
+
+@LogReplay;
+CUresult
+cuCtxCreate_v2 ( CUcontext* pctx, unsigned int  flags, CUdevice dev );
+/*
+Create a CUDA context.
+*/;
+
+@LogReplay;
+CUresult
+cuCtxDestroy_v2 ( CUcontext ctx );
+/*
+Destroy a CUDA context.
+*/;
+
+CUresult
+cuCtxGetApiVersion ( CUcontext ctx, unsigned int* version );
+/*
+Gets the context's API version.
+*/;
+
+CUresult
+cuCtxGetCacheConfig ( CUfunc_cache* pconfig );
+/*
+Returns the preferred cache configuration for the current context.
+*/;
+
+CUresult
+cuCtxGetCurrent ( CUcontext* pctx );
+/*
+Returns the CUDA context bound to the calling CPU thread.
+*/;
+
+CUresult
+cuCtxGetDevice ( CUdevice* device );
+/*
+Returns the device ID for the current context.
+*/;
+
+CUresult
+cuCtxGetFlags ( unsigned int* flags );
+/*
+Returns the flags for the current context.
+*/;
+
+CUresult
+cuCtxGetLimit ( size_t* pvalue, CUlimit limit );
+/*
+Returns resource limits.
+*/;
+
+CUresult
+cuCtxGetSharedMemConfig ( CUsharedconfig* pConfig );
+/*
+Returns the current shared memory configuration for the current context.
+*/;
+
+CUresult
+cuCtxGetStreamPriorityRange ( int* leastPriority, int* greatestPriority );
+/*
+Returns numerical values that correspond to the least and greatest stream priorities.
+*/;
+
+CUresult
+cuCtxPopCurrent_v2 ( CUcontext* pctx );
+/*
+Pops the current CUDA context from the current CPU thread.
+*/;
+
+CUresult
+cuCtxPushCurrent_v2 ( CUcontext ctx );
+/*
+Pushes a context on the current CPU thread.
+*/;
+
+CUresult
+cuCtxSetCacheConfig ( CUfunc_cache config );
+/*
+Sets the preferred cache configuration for the current context.
+*/;
+
+CUresult
+cuCtxSetCurrent ( CUcontext ctx );
+/*
+Binds the specified CUDA context to the calling CPU thread.
+*/;
+
+CUresult
+cuCtxSetLimit ( CUlimit limit, size_t value );
+/*
+Set resource limits.
+*/;
+
+CUresult
+cuCtxSetSharedMemConfig ( CUsharedconfig config );
+/*
+Sets the shared memory configuration for the current context.
+*/;
+
+CUresult
+cuCtxSynchronize ();
+/*
+Block for a context's tasks to complete.
+*/;
+
+/* ==== Context Management [DEPRECATED] ==== */;
+
+CUresult
+cuCtxAttach ( CUcontext* pctx, unsigned int  flags );
+/*
+Increment a context's usage-count.
+*/;
+
+CUresult
+cuCtxDetach ( CUcontext ctx );
+/*
+Decrement a context's usage-count.
+*/;
+
+/* ==== Module Management ==== */;
+
+
+CUresult
+cuLinkAddData_v2 ( CUlinkState state, CUjitInputType type, void* data, size_t size, const char* name, unsigned int  numOptions, CUjit_option* options, void** optionValues );
+/*
+Add an input to a pending linker invocation.
+*/;
+
+CUresult
+cuLinkAddFile_v2 ( CUlinkState state, CUjitInputType type, const char* path, unsigned int  numOptions, CUjit_option* options, void** optionValues );
+/*
+Add a file input to a pending linker invocation.
+*/;
+
+CUresult
+cuLinkComplete ( CUlinkState state, void** cubinOut, size_t* sizeOut );
+/*
+Complete a pending linker invocation.
+*/;
+
+@LogReplay;
+CUresult
+cuLinkCreate_v2 ( unsigned int  numOptions, CUjit_option* options, void** optionValues, CUlinkState* stateOut );
+/*
+Creates a pending JIT linker invocation.
+*/;
+
+@LogReplay;
+CUresult
+cuLinkDestroy ( CUlinkState state );
+/*
+Destroys state for a JIT linker invocation.
+*/;
+
+CUresult
+cuModuleGetFunction ( CUfunction* hfunc, CUmodule hmod, const char* name );
+/*
+Returns a function handle.
+*/;
+
+CUresult
+cuModuleGetGlobal_v2 ( CUdeviceptr* dptr, size_t* bytes, CUmodule hmod, const char* name );
+/*
+Returns a global pointer from a module.
+*/;
+
+CUresult
+cuModuleGetSurfRef ( CUsurfref* pSurfRef, CUmodule hmod, const char* name );
+/*
+Returns a handle to a surface reference.
+*/;
+
+CUresult
+cuModuleGetTexRef ( CUtexref* pTexRef, CUmodule hmod, const char* name );
+/*
+Returns a handle to a texture reference.
+*/;
+
+CUresult
+cuModuleLoad ( CUmodule* module, const char* fname );
+/*
+Loads a compute module.
+*/;
+
+CUresult
+cuModuleLoadData ( CUmodule* module, const void* image );
+/*
+Load a module's data.
+*/;
+
+CUresult
+cuModuleLoadDataEx ( CUmodule* module, const void* image, unsigned int  numOptions, CUjit_option* options, void** optionValues );
+/*
+Load a module's data with options.
+*/;
+
+CUresult
+cuModuleLoadFatBinary ( CUmodule* module, const void* fatCubin );
+/*
+Load a module's data.
+*/;
+
+CUresult
+cuModuleUnload ( CUmodule hmod );
+/*
+Unloads a module.
+*/;
+
+/* ==== Memory Management ==== */;
+
+@LogReplay;
+CUresult
+cuArray3DCreate_v2 ( CUarray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pAllocateArray );
+/*
+Creates a 3D CUDA array.
+*/;
+
+CUresult
+cuArray3DGetDescriptor_v2 ( CUDA_ARRAY3D_DESCRIPTOR* pArrayDescriptor, CUarray hArray );
+/*
+Get a 3D CUDA array descriptor.
+*/;
+
+@LogReplay;
+CUresult
+cuArrayCreate_v2 ( CUarray* pHandle, const CUDA_ARRAY_DESCRIPTOR* pAllocateArray );
+/*
+Creates a 1D or 2D CUDA array.
+*/;
+
+@LogReplay;
+CUresult
+cuArrayDestroy ( CUarray hArray );
+/*
+Destroys a CUDA array.
+*/;
+
+CUresult
+cuArrayGetDescriptor_v2 ( CUDA_ARRAY_DESCRIPTOR* pArrayDescriptor, CUarray hArray );
+/*
+Get a 1D or 2D CUDA array descriptor.
+*/;
+
+CUresult
+cuDeviceGetByPCIBusId ( CUdevice* dev, const char* pciBusId );
+/*
+Returns a handle to a compute device.
+*/;
+
+CUresult
+cuDeviceGetPCIBusId ( char* pciBusId, int  len, CUdevice dev );
+/*
+Returns a PCI Bus Id string for the device.
+*/;
+
+CUresult
+cuIpcCloseMemHandle ( CUdeviceptr dptr );
+/*
+Close memory mapped with cuIpcOpenMemHandle.
+*/;
+
+CUresult
+cuIpcGetEventHandle ( CUipcEventHandle* pHandle, CUevent event );
+/*
+Gets an interprocess handle for a previously allocated event.
+*/;
+
+CUresult
+cuIpcGetMemHandle ( CUipcMemHandle* pHandle, CUdeviceptr dptr );
+/*
+Gets an interprocess memory handle for an existing device memory allocation.
+*/;
+
+CUresult
+cuIpcOpenEventHandle ( CUevent* phEvent, CUipcEventHandle handle );
+/*
+Opens an interprocess event handle for use in the current process.
+*/;
+
+CUresult
+cuIpcOpenMemHandle ( CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int  Flags );
+/*
+Opens an interprocess memory handle exported from another process and returns a device pointer usable in the local process.
+*/;
+
+CUresult
+cuMemAlloc_v2 ( CUdeviceptr* dptr, size_t bytesize );
+/*
+Allocates device memory.
+*/;
+
+CUresult
+cuMemAllocHost_v2 ( void** pp, size_t bytesize );
+/*
+Allocates page-locked host memory.
+*/;
+
+CUresult
+cuMemAllocManaged ( CUdeviceptr* dptr, size_t bytesize, unsigned int  flags );
+/*
+Allocates memory that will be automatically managed by the Unified Memory system.
+*/;
+
+CUresult
+cuMemAllocPitch_v2 ( CUdeviceptr* dptr, size_t* pPitch, size_t WidthInBytes, size_t Height, unsigned int  ElementSizeBytes );
+/*
+Allocates pitched device memory.
+*/;
+
+CUresult
+cuMemFree_v2 ( CUdeviceptr dptr );
+/*
+Frees device memory.
+*/;
+
+CUresult
+cuMemFreeHost ( void* p );
+/*
+Frees page-locked host memory.
+*/;
+
+CUresult
+cuMemGetAddressRange_v2 ( CUdeviceptr* pbase, size_t* psize, CUdeviceptr dptr );
+/*
+Get information on memory allocations.
+*/;
+
+CUresult
+cuMemGetInfo_v2 ( size_t* free, size_t* total );
+/*
+Gets free and total memory.
+*/;
+
+CUresult
+cuMemHostAlloc ( void** pp, size_t bytesize, unsigned int  Flags );
+/*
+Allocates page-locked host memory.
+*/;
+
+CUresult
+cuMemHostGetDevicePointer_v2 ( CUdeviceptr* pdptr, void* p, unsigned int  Flags );
+/*
+Passes back device pointer of mapped pinned memory.
+*/;
+
+CUresult
+cuMemHostGetFlags ( unsigned int* pFlags, void* p );
+/*
+Passes back flags that were used for a pinned allocation.
+*/;
+
+CUresult
+cuMemHostRegister_v2 ( void* p, size_t bytesize, unsigned int  Flags );
+/*
+Registers an existing host memory range for use by CUDA.
+*/;
+
+CUresult
+cuMemHostUnregister ( void* p );
+/*
+Unregisters a memory range that was registered with cuMemHostRegister.
+*/;
+
+CUresult
+cuMemcpy ( CUdeviceptr dst, CUdeviceptr src, size_t ByteCount );
+/*
+Copies memory.
+*/;
+
+CUresult
+cuMemcpy2D_v2 ( const CUDA_MEMCPY2D* pCopy );
+/*
+Copies memory for 2D arrays.
+*/;
+
+CUresult
+cuMemcpy2DAsync_v2 ( const CUDA_MEMCPY2D* pCopy, CUstream hStream );
+/*
+Copies memory for 2D arrays.
+*/;
+
+CUresult
+cuMemcpy2DUnaligned_v2 ( const CUDA_MEMCPY2D* pCopy );
+/*
+Copies memory for 2D arrays.
+*/;
+
+CUresult
+cuMemcpy3D_v2 ( const CUDA_MEMCPY3D* pCopy );
+/*
+Copies memory for 3D arrays.
+*/;
+
+CUresult
+cuMemcpy3DAsync_v2 ( const CUDA_MEMCPY3D* pCopy, CUstream hStream );
+/*
+Copies memory for 3D arrays.
+*/;
+
+CUresult
+cuMemcpy3DPeer ( const CUDA_MEMCPY3D_PEER* pCopy );
+/*
+Copies memory between contexts.
+*/;
+
+CUresult
+cuMemcpy3DPeerAsync ( const CUDA_MEMCPY3D_PEER* pCopy, CUstream hStream );
+/*
+Copies memory between contexts asynchronously.
+*/;
+
+CUresult
+cuMemcpyAsync ( CUdeviceptr dst, CUdeviceptr src, size_t ByteCount, CUstream hStream );
+/*
+Copies memory asynchronously.
+*/;
+
+CUresult
+cuMemcpyAtoA_v2 ( CUarray dstArray, size_t dstOffset, CUarray srcArray, size_t srcOffset, size_t ByteCount );
+/*
+Copies memory from Array to Array.
+*/;
+
+CUresult
+cuMemcpyAtoD_v2 ( CUdeviceptr dstDevice, CUarray srcArray, size_t srcOffset, size_t ByteCount );
+/*
+Copies memory from Array to Device.
+*/;
+
+CUresult
+cuMemcpyAtoH_v2 ( void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount );
+/*
+Copies memory from Array to Host.
+*/;
+
+CUresult
+cuMemcpyAtoHAsync_v2 ( void* dstHost, CUarray srcArray, size_t srcOffset, size_t ByteCount, CUstream hStream );
+/*
+Copies memory from Array to Host.
+*/;
+
+CUresult
+cuMemcpyDtoA_v2 ( CUarray dstArray, size_t dstOffset, CUdeviceptr srcDevice, size_t ByteCount );
+/*
+Copies memory from Device to Array.
+*/;
+
+CUresult
+cuMemcpyDtoD_v2 ( CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount );
+/*
+Copies memory from Device to Device.
+*/;
+
+CUresult
+cuMemcpyDtoDAsync_v2 ( CUdeviceptr dstDevice, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream );
+/*
+Copies memory from Device to Device.
+*/;
+
+CUresult
+cuMemcpyDtoH_v2 ( void* dstHost, CUdeviceptr srcDevice, size_t ByteCount );
+/*
+Copies memory from Device to Host.
+*/;
+
+CUresult
+cuMemcpyDtoHAsync_v2 ( void* dstHost, CUdeviceptr srcDevice, size_t ByteCount, CUstream hStream );
+/*
+Copies memory from Device to Host.
+*/;
+
+CUresult
+cuMemcpyHtoA_v2 ( CUarray dstArray, size_t dstOffset, const void* srcHost, size_t ByteCount );
+/*
+Copies memory from Host to Array.
+*/;
+
+CUresult
+cuMemcpyHtoAAsync_v2 ( CUarray dstArray, size_t dstOffset, const void* srcHost, size_t ByteCount, CUstream hStream );
+/*
+Copies memory from Host to Array.
+*/;
+
+CUresult
+cuMemcpyHtoD_v2 ( CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount );
+/*
+Copies memory from Host to Device.
+*/;
+
+CUresult
+cuMemcpyHtoDAsync_v2 ( CUdeviceptr dstDevice, const void* srcHost, size_t ByteCount, CUstream hStream );
+/*
+Copies memory from Host to Device.
+*/;
+
+CUresult
+cuMemcpyPeer ( CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount );
+/*
+Copies device memory between two contexts.
+*/;
+
+CUresult
+cuMemcpyPeerAsync ( CUdeviceptr dstDevice, CUcontext dstContext, CUdeviceptr srcDevice, CUcontext srcContext, size_t ByteCount, CUstream hStream );
+/*
+Copies device memory between two contexts asynchronously.
+*/;
+
+CUresult
+cuMemsetD16_v2 ( CUdeviceptr dstDevice, unsigned short us, size_t N );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD16Async ( CUdeviceptr dstDevice, unsigned short us, size_t N, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+CUresult
+cuMemsetD2D16_v2 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD2D16Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned short us, size_t Width, size_t Height, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+CUresult
+cuMemsetD2D32_v2 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD2D32Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned int  ui, size_t Width, size_t Height, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+CUresult
+cuMemsetD2D8_v2 ( CUdeviceptr dstDevice, size_t dstPitch, unsigned char  uc, size_t Width, size_t Height );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD2D8Async ( CUdeviceptr dstDevice, size_t dstPitch, unsigned char  uc, size_t Width, size_t Height, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+CUresult
+cuMemsetD32_v2 ( CUdeviceptr dstDevice, unsigned int  ui, size_t N );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD32Async ( CUdeviceptr dstDevice, unsigned int  ui, size_t N, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+CUresult
+cuMemsetD8_v2 ( CUdeviceptr dstDevice, unsigned char  uc, size_t N );
+/*
+Initializes device memory.
+*/;
+
+CUresult
+cuMemsetD8Async ( CUdeviceptr dstDevice, unsigned char  uc, size_t N, CUstream hStream );
+/*
+Sets device memory.
+*/;
+
+@LogReplay;
+CUresult
+cuMipmappedArrayCreate ( CUmipmappedArray* pHandle, const CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc, unsigned int  numMipmapLevels );
+/*
+Creates a CUDA mipmapped array.
+*/;
+
+@LogReplay;
+CUresult
+cuMipmappedArrayDestroy ( CUmipmappedArray hMipmappedArray );
+/*
+Destroys a CUDA mipmapped array.
+*/;
+
+CUresult
+cuMipmappedArrayGetLevel ( CUarray* pLevelArray, CUmipmappedArray hMipmappedArray, unsigned int  level );
+/*
+Gets a mipmap level of a CUDA mipmapped array.
+*/;
+
+/* ==== Unified Addressing ==== */;
+
+CUresult
+cuMemAdvise ( CUdeviceptr devPtr, size_t count, CUmem_advise advice, CUdevice device );
+/*
+Advise about the usage of a given memory range.
+*/;
+
+CUresult
+cuMemPrefetchAsync ( CUdeviceptr devPtr, size_t count, CUdevice dstDevice, CUstream hStream );
+/*
+Prefetches memory to the specified destination device.
+*/;
+
+CUresult
+cuMemRangeGetAttribute ( void* data, size_t dataSize, CUmem_range_attribute attribute, CUdeviceptr devPtr, size_t count );
+/*
+Query an attribute of a given memory range.
+*/;
+
+CUresult
+cuMemRangeGetAttributes ( void** data, size_t* dataSizes, CUmem_range_attribute* attributes, size_t numAttributes, CUdeviceptr devPtr, size_t count );
+/*
+Query attributes of a given memory range.
+*/;
+
+CUresult
+cuPointerGetAttribute ( void* data, CUpointer_attribute attribute, CUdeviceptr ptr );
+/*
+Returns information about a pointer.
+*/;
+
+CUresult
+cuPointerGetAttributes ( unsigned int  numAttributes, CUpointer_attribute* attributes, void** data, CUdeviceptr ptr );
+/*
+Returns information about a pointer.
+*/;
+
+CUresult
+cuPointerSetAttribute ( const void* value, CUpointer_attribute attribute, CUdeviceptr ptr );
+/*
+Set attributes on a previously allocated memory region.
+*/;
+
+/* ==== Stream Management ==== */;
+
+CUresult
+cuStreamAddCallback ( CUstream hStream, CUstreamCallback callback, void* userData, unsigned int  flags );
+/*
+Add a callback to a compute stream.
+*/;
+
+CUresult
+cuStreamAttachMemAsync ( CUstream hStream, CUdeviceptr dptr, size_t length, unsigned int  flags );
+/*
+Attach memory to a stream asynchronously.
+*/;
+/*
+CUresult
+cuStreamBeginCapture_v2 ( CUstream hStream )*/;
+/*
+Begins graph capture on a stream.
+*/;
+
+@LogReplay;
+CUresult
+cuStreamCreate ( CUstream* phStream, unsigned int  Flags );
+/*
+Create a stream.
+*/;
+
+@LogReplay;
+CUresult
+cuStreamCreateWithPriority ( CUstream* phStream, unsigned int  flags, int  priority );
+/*
+Create a stream with the given priority.
+*/;
+
+@LogReplay;
+CUresult
+cuStreamDestroy_v2 ( CUstream hStream );
+/*
+Destroys a stream.
+*/;
+
+CUresult
+cuStreamEndCapture ( CUstream hStream, CUgraph* phGraph );
+/*
+Ends capture on a stream, returning the captured graph.
+*/;
+
+/*
+CUresult
+cuStreamGetCaptureInfo ( CUstream hStream, CUstreamCaptureStatus* captureStatus, cuuint64_t* id ) */;
+/*
+Query capture status of a stream.
+*/;
+
+CUresult
+cuStreamGetCtx ( CUstream hStream, CUcontext* pctx );
+/*
+Query the context associated with a stream.
+*/;
+
+CUresult
+cuStreamGetFlags ( CUstream hStream, unsigned int* flags );
+/*
+Query the flags of a given stream.
+*/;
+
+CUresult
+cuStreamGetPriority ( CUstream hStream, int* priority );
+/*
+Query the priority of a given stream.
+*/;
+
+CUresult
+cuStreamIsCapturing ( CUstream hStream, CUstreamCaptureStatus* captureStatus );
+/*
+Returns a stream's capture status.
+*/;
+
+CUresult
+cuStreamQuery ( CUstream hStream );
+/*
+Determine status of a compute stream.
+*/;
+
+CUresult
+cuStreamSynchronize ( CUstream hStream );
+/*
+Wait until a stream's tasks are completed.
+*/;
+
+CUresult
+cuStreamWaitEvent ( CUstream hStream, CUevent hEvent, unsigned int  Flags );
+/*
+Make a compute stream wait on an event.
+*/;
+
+/*
+CUresult
+cuThreadExchangeStreamCaptureMode ( CUstreamCaptureMode* mode ) */;
+/*
+Swaps the stream capture interaction mode for a thread.
+Cuda 10.1 API
+*/;
+
+/* ==== Event Management ==== */;
+
+@LogReplay;
+CUresult
+cuEventCreate ( CUevent* phEvent, unsigned int  Flags );
+/*
+Creates an event.
+*/;
+
+@LogReplay;
+CUresult
+cuEventDestroy_v2 ( CUevent hEvent );
+/*
+Destroys an event.
+*/;
+
+CUresult
+cuEventElapsedTime ( float* pMilliseconds, CUevent hStart, CUevent hEnd );
+/*
+Computes the elapsed time between two events.
+*/;
+
+CUresult
+cuEventQuery ( CUevent hEvent );
+/*
+Queries an event's status.
+*/;
+
+CUresult
+cuEventRecord ( CUevent hEvent, CUstream hStream );
+/*
+Records an event.
+*/;
+
+CUresult
+cuEventSynchronize ( CUevent hEvent );
+/*
+Waits for an event to complete. */;
+
+/* ==== External Resource Interoperability ==== */;
+
+@LogReplay;
+CUresult
+cuDestroyExternalMemory ( CUexternalMemory extMem );
+/*
+Destroys an external memory object.
+*/;
+
+@LogReplay;
+CUresult
+cuDestroyExternalSemaphore ( CUexternalSemaphore extSem );
+/*
+Destroys an external semaphore.
+*/;
+
+CUresult
+cuExternalMemoryGetMappedBuffer ( CUdeviceptr* devPtr, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_BUFFER_DESC* bufferDesc );
+/*
+Maps a buffer onto an imported memory object.
+*/;
+
+CUresult
+cuExternalMemoryGetMappedMipmappedArray ( CUmipmappedArray* mipmap, CUexternalMemory extMem, const CUDA_EXTERNAL_MEMORY_MIPMAPPED_ARRAY_DESC* mipmapDesc );
+/*
+Maps a CUDA mipmapped array onto an external memory object.
+*/;
+
+CUresult
+cuImportExternalMemory ( CUexternalMemory* extMem_out, const CUDA_EXTERNAL_MEMORY_HANDLE_DESC* memHandleDesc );
+/*
+Imports an external memory object.
+*/;
+
+CUresult
+cuImportExternalSemaphore ( CUexternalSemaphore* extSem_out, const CUDA_EXTERNAL_SEMAPHORE_HANDLE_DESC* semHandleDesc );
+/*
+Imports an external semaphore.
+*/;
+
+CUresult
+cuSignalExternalSemaphoresAsync ( const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_SIGNAL_PARAMS* paramsArray, unsigned int  numExtSems, CUstream stream );
+/*
+Signals a set of external semaphore objects.
+*/;
+
+CUresult
+cuWaitExternalSemaphoresAsync ( const CUexternalSemaphore* extSemArray, const CUDA_EXTERNAL_SEMAPHORE_WAIT_PARAMS* paramsArray, unsigned int  numExtSems, CUstream stream );
+/*
+Waits on a set of external semaphore objects. */;
+
+/*  ==== Stream memory operations  ==== */;
+
+CUresult
+cuStreamBatchMemOp ( CUstream stream, unsigned int  count, CUstreamBatchMemOpParams* paramArray, unsigned int  flags );
+/*
+Batch operations to synchronize the stream via memory operations.
+*/;
+
+CUresult
+cuStreamWaitValue32 ( CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int  flags );
+/*
+Wait on a memory location.
+*/;
+
+CUresult
+cuStreamWaitValue64 ( CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int  flags );
+/*
+Wait on a memory location.
+*/;
+
+CUresult
+cuStreamWriteValue32 ( CUstream stream, CUdeviceptr addr, cuuint32_t value, unsigned int  flags );
+/*
+Write a value to memory.
+*/;
+
+CUresult
+cuStreamWriteValue64 ( CUstream stream, CUdeviceptr addr, cuuint64_t value, unsigned int  flags );
+/*
+Write a value to memory. */;
+
+/*  ==== Execution Control  ==== */;
+
+CUresult
+cuFuncGetAttribute ( int* pi, CUfunction_attribute attrib, CUfunction hfunc );
+/*
+Returns information about a function.
+*/;
+
+CUresult
+cuFuncSetAttribute ( CUfunction hfunc, CUfunction_attribute attrib, int  value );
+/*
+Sets information about a function.
+*/;
+
+CUresult
+cuFuncSetCacheConfig ( CUfunction hfunc, CUfunc_cache config );
+/*
+Sets the preferred cache configuration for a device function.
+*/;
+
+CUresult
+cuFuncSetSharedMemConfig ( CUfunction hfunc, CUsharedconfig config );
+/*
+Sets the shared memory configuration for a device function.
+*/;
+
+CUresult
+cuLaunchCooperativeKernel ( CUfunction f, unsigned int  gridDimX, unsigned int  gridDimY, unsigned int  gridDimZ, unsigned int  blockDimX, unsigned int  blockDimY, unsigned int  blockDimZ, unsigned int  sharedMemBytes, CUstream hStream, void** kernelParams );
+/*
+Launches a CUDA function where thread blocks can cooperate and synchronize as they execute.
+*/;
+
+CUresult
+cuLaunchCooperativeKernelMultiDevice ( CUDA_LAUNCH_PARAMS* launchParamsList, unsigned int  numDevices, unsigned int  flags );
+/*
+Launches CUDA functions on multiple devices where thread blocks can cooperate and synchronize as they execute.
+*/;
+
+CUresult
+cuLaunchHostFunc ( CUstream hStream, CUhostFn fn, void* userData );
+/*
+Enqueues a host function call in a stream.
+*/;
+
+CUresult
+cuLaunchKernel ( CUfunction f, unsigned int  gridDimX, unsigned int  gridDimY, unsigned int  gridDimZ, unsigned int  blockDimX, unsigned int  blockDimY, unsigned int  blockDimZ, unsigned int  sharedMemBytes, CUstream hStream, void** kernelParams, void** extra );
+/*
+  Launches a CUDA function.
+*/;
+
+/* ==== Execution Control [DEPRECATED] ==== */;
+
+CUresult
+cuFuncSetBlockShape ( CUfunction hfunc, int  x, int  y, int  z );
+/*
+Sets the block-dimensions for the function.
+*/;
+
+CUresult
+cuFuncSetSharedSize ( CUfunction hfunc, unsigned int  bytes );
+/*
+Sets the dynamic shared-memory size for the function.
+*/;
+
+CUresult
+cuLaunch ( CUfunction f );
+/*
+Launches a CUDA function.
+*/;
+
+CUresult
+cuLaunchGrid ( CUfunction f, int  grid_width, int  grid_height );
+/*
+Launches a CUDA function.
+*/;
+
+CUresult
+cuLaunchGridAsync ( CUfunction f, int  grid_width, int  grid_height, CUstream hStream );
+/*
+Launches a CUDA function.
+*/;
+
+CUresult
+cuParamSetSize ( CUfunction hfunc, unsigned int  numbytes );
+/*
+Sets the parameter size for the function.
+*/;
+
+CUresult
+cuParamSetTexRef ( CUfunction hfunc, int  texunit, CUtexref hTexRef );
+/*
+Adds a texture-reference to the function's argument list.
+*/;
+
+CUresult
+cuParamSetf ( CUfunction hfunc, int  offset, float  value );
+/*
+Adds a floating-point parameter to the function's argument list.
+*/;
+
+CUresult
+cuParamSeti ( CUfunction hfunc, int  offset, unsigned int  value );
+/*
+Adds an integer parameter to the function's argument list.
+*/;
+
+CUresult
+cuParamSetv ( CUfunction hfunc, int  offset, void* ptr, unsigned int  numbytes );
+/*
+Adds arbitrary data to the function's argument list. */;
+
+/*  ==== Graph Management  ==== */;
+/*
+CUresult
+cuGraphAddChildGraphNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies, CUgraph childGraph )*/;
+/*
+Creates a child graph node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphAddDependencies ( CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, size_t numDependencies )*/;
+/*
+Adds dependency edges to a graph.
+*/;
+/*
+CUresult
+cuGraphAddEmptyNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies )*/;
+/*
+Creates an empty node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphAddHostNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies, const CUDA_HOST_NODE_PARAMS* nodeParams )*/;
+/*
+Creates a host execution node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphAddKernelNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies, const CUDA_KERNEL_NODE_PARAMS* nodeParams )*/;
+/*
+Creates a kernel execution node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphAddMemcpyNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies, const CUDA_MEMCPY3D* copyParams, CUcontext ctx )*/;
+/*
+Creates a memcpy node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphAddMemsetNode ( CUgraphNode* phGraphNode, CUgraph hGraph, CUgraphNode* dependencies, size_t numDependencies, const CUDA_MEMSET_NODE_PARAMS* memsetParams, CUcontext ctx )*/;
+/*
+Creates a memset node and adds it to a graph.
+*/;
+/*
+CUresult
+cuGraphChildGraphNodeGetGraph ( CUgraphNode hNode, CUgraph* phGraph )*/;
+/*
+Gets a handle to the embedded graph of a child graph node.
+*/;
+/*
+CUresult
+cuGraphClone ( CUgraph* phGraphClone, CUgraph originalGraph )*/;
+/*
+Clones a graph.
+*/;
+
+@LogReplay;
+CUresult
+cuGraphCreate ( CUgraph* phGraph, unsigned int  flags );
+/*
+Creates a graph.
+*/;
+
+@LogReplay;
+CUresult
+cuGraphDestroy ( CUgraph hGraph );
+/*
+Destroys a graph.
+*/;
+
+@LogReplay;
+CUresult
+cuGraphDestroyNode ( CUgraphNode hNode );
+/*
+Remove a node from the graph.
+*/;
+
+@LogReplay;
+CUresult
+cuGraphExecDestroy ( CUgraphExec hGraphExec );
+/*
+Destroys an executable graph.
+*/;
+
+CUresult
+cuGraphGetEdges ( CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, size_t* numEdges );
+/*
+Returns a graph's dependency edges.
+*/;
+
+CUresult
+cuGraphGetNodes ( CUgraph hGraph, CUgraphNode* nodes, size_t* numNodes );
+/*
+Returns a graph's nodes.
+*/;
+
+CUresult
+cuGraphGetRootNodes ( CUgraph hGraph, CUgraphNode* rootNodes, size_t* numRootNodes );
+/*
+Returns a graph's root nodes.
+*/;
+
+CUresult
+cuGraphHostNodeGetParams ( CUgraphNode hNode, CUDA_HOST_NODE_PARAMS* nodeParams );
+/*
+Returns a host node's parameters.
+*/;
+
+CUresult
+cuGraphHostNodeSetParams ( CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeParams );
+/*
+Sets a host node's parameters.
+*/;
+
+CUresult
+cuGraphInstantiate ( CUgraphExec* phGraphExec, CUgraph hGraph, CUgraphNode* phErrorNode, char* logBuffer, size_t bufferSize );
+/*
+Creates an executable graph from a graph.
+*/;
+
+CUresult
+cuGraphKernelNodeGetParams ( CUgraphNode hNode, CUDA_KERNEL_NODE_PARAMS* nodeParams );
+/*
+Returns a kernel node's parameters.
+*/;
+
+CUresult
+cuGraphKernelNodeSetParams ( CUgraphNode hNode, const CUDA_KERNEL_NODE_PARAMS* nodeParams );
+/*
+Sets a kernel node's parameters.
+*/;
+
+CUresult
+cuGraphLaunch ( CUgraphExec hGraphExec, CUstream hStream );
+/*
+Launches an executable graph in a stream.
+*/;
+
+CUresult
+cuGraphMemcpyNodeGetParams ( CUgraphNode hNode, CUDA_MEMCPY3D* nodeParams );
+/*
+Returns a memcpy node's parameters.
+*/;
+
+CUresult
+cuGraphMemcpyNodeSetParams ( CUgraphNode hNode, const CUDA_MEMCPY3D* nodeParams );
+/*
+Sets a memcpy node's parameters.
+*/;
+
+CUresult
+cuGraphMemsetNodeGetParams ( CUgraphNode hNode, CUDA_MEMSET_NODE_PARAMS* nodeParams );
+/*
+Returns a memset node's parameters.
+*/;
+
+CUresult
+cuGraphMemsetNodeSetParams ( CUgraphNode hNode, const CUDA_MEMSET_NODE_PARAMS* nodeParams );
+/*
+Sets a memset node's parameters.
+*/;
+
+CUresult
+cuGraphNodeFindInClone ( CUgraphNode* phNode, CUgraphNode hOriginalNode, CUgraph hClonedGraph );
+/*
+Finds a cloned version of a node.
+*/;
+
+CUresult
+cuGraphNodeGetDependencies ( CUgraphNode hNode, CUgraphNode* dependencies, size_t* numDependencies );
+/*
+Returns a node's dependencies.
+*/;
+
+CUresult
+cuGraphNodeGetDependentNodes ( CUgraphNode hNode, CUgraphNode* dependentNodes, size_t* numDependentNodes );
+/*
+Returns a node's dependent nodes.
+*/;
+
+CUresult
+cuGraphNodeGetType ( CUgraphNode hNode, CUgraphNodeType* type );
+/*
+Returns a node's type.
+*/;
+/*
+CUresult
+cuGraphRemoveDependencies ( CUgraph hGraph, CUgraphNode* from, CUgraphNode* to, size_t numDependencies )*/;
+/*
+Removes dependency edges from a graph.
+*/;
+
+/*  ==== Occupancy ====  */;
+
+CUresult
+cuOccupancyMaxActiveBlocksPerMultiprocessor ( int* numBlocks, CUfunction func, int  blockSize, size_t dynamicSMemSize );
+/*
+Returns occupancy of a function.
+*/;
+
+CUresult
+cuOccupancyMaxActiveBlocksPerMultiprocessorWithFlags ( int* numBlocks, CUfunction func, int  blockSize, size_t dynamicSMemSize, unsigned int  flags );
+/*
+Returns occupancy of a function.
+*/;
+
+CUresult
+cuOccupancyMaxPotentialBlockSize ( int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int  blockSizeLimit );
+/*
+Suggest a launch configuration with reasonable occupancy.
+*/;
+
+CUresult
+cuOccupancyMaxPotentialBlockSizeWithFlags ( int* minGridSize, int* blockSize, CUfunction func, CUoccupancyB2DSize blockSizeToDynamicSMemSize, size_t dynamicSMemSize, int  blockSizeLimit, unsigned int  flags );
+/*
+Suggest a launch configuration with reasonable occupancy. */;
+
+/* ==== Texture Reference Management [DEPRECATED] ==== */;
+
+@LogReplay;
+CUresult
+cuTexRefCreate ( CUtexref* pTexRef );
+/*
+Creates a texture reference.
+*/;
+
+@LogReplay;
+CUresult
+cuTexRefDestroy ( CUtexref hTexRef );
+/*
+Destroys a texture reference.
+*/;
+
+CUresult
+cuTexRefGetAddress_v2 ( CUdeviceptr* pdptr, CUtexref hTexRef );
+/*
+Gets the address associated with a texture reference.
+*/;
+
+CUresult
+cuTexRefGetAddressMode ( CUaddress_mode* pam, CUtexref hTexRef, int  dim );
+/*
+Gets the addressing mode used by a texture reference.
+*/;
+
+CUresult
+cuTexRefGetArray ( CUarray* phArray, CUtexref hTexRef );
+/*
+Gets the array bound to a texture reference.
+*/;
+
+CUresult
+cuTexRefGetBorderColor ( float* pBorderColor, CUtexref hTexRef );
+/*
+Gets the border color used by a texture reference.
+*/;
+
+CUresult
+cuTexRefGetFilterMode ( CUfilter_mode* pfm, CUtexref hTexRef );
+/*
+Gets the filter-mode used by a texture reference.
+*/;
+
+CUresult
+cuTexRefGetFlags ( unsigned int* pFlags, CUtexref hTexRef );
+/*
+Gets the flags used by a texture reference.
+*/;
+
+CUresult
+cuTexRefGetFormat ( CUarray_format* pFormat, int* pNumChannels, CUtexref hTexRef );
+/*
+Gets the format used by a texture reference.
+*/;
+
+CUresult
+cuTexRefGetMaxAnisotropy ( int* pmaxAniso, CUtexref hTexRef );
+/*
+Gets the maximum anisotropy for a texture reference.
+*/;
+
+CUresult
+cuTexRefGetMipmapFilterMode ( CUfilter_mode* pfm, CUtexref hTexRef );
+/*
+Gets the mipmap filtering mode for a texture reference.
+*/;
+
+CUresult
+cuTexRefGetMipmapLevelBias ( float* pbias, CUtexref hTexRef );
+/*
+Gets the mipmap level bias for a texture reference.
+*/;
+
+CUresult
+cuTexRefGetMipmapLevelClamp ( float* pminMipmapLevelClamp, float* pmaxMipmapLevelClamp, CUtexref hTexRef );
+/*
+Gets the min/max mipmap level clamps for a texture reference.
+*/;
+
+CUresult
+cuTexRefGetMipmappedArray ( CUmipmappedArray* phMipmappedArray, CUtexref hTexRef );
+/*
+Gets the mipmapped array bound to a texture reference.
+*/;
+
+CUresult
+cuTexRefSetAddress_v2 ( size_t* ByteOffset, CUtexref hTexRef, CUdeviceptr dptr, size_t bytes );
+/*
+Binds an address as a texture reference.
+*/;
+
+CUresult
+cuTexRefSetAddress2D_v3 ( CUtexref hTexRef, const CUDA_ARRAY_DESCRIPTOR* desc, CUdeviceptr dptr, size_t Pitch );
+/*
+Binds an address as a 2D texture reference.
+*/;
+
+CUresult
+cuTexRefSetAddressMode ( CUtexref hTexRef, int  dim, CUaddress_mode am );
+/*
+Sets the addressing mode for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetArray ( CUtexref hTexRef, CUarray hArray, unsigned int  Flags );
+/*
+Binds an array as a texture reference.
+*/;
+
+CUresult
+cuTexRefSetBorderColor ( CUtexref hTexRef, float* pBorderColor );
+/*
+Sets the border color for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetFilterMode ( CUtexref hTexRef, CUfilter_mode fm );
+/*
+Sets the filtering mode for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetFlags ( CUtexref hTexRef, unsigned int  Flags );
+/*
+Sets the flags for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetFormat ( CUtexref hTexRef, CUarray_format fmt, int  NumPackedComponents );
+/*
+Sets the format for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetMaxAnisotropy ( CUtexref hTexRef, unsigned int  maxAniso );
+/*
+Sets the maximum anisotropy for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetMipmapFilterMode ( CUtexref hTexRef, CUfilter_mode fm );
+/*
+Sets the mipmap filtering mode for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetMipmapLevelBias ( CUtexref hTexRef, float  bias );
+/*
+Sets the mipmap level bias for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetMipmapLevelClamp ( CUtexref hTexRef, float  minMipmapLevelClamp, float  maxMipmapLevelClamp );
+/*
+Sets the mipmap min/max mipmap level clamps for a texture reference.
+*/;
+
+CUresult
+cuTexRefSetMipmappedArray ( CUtexref hTexRef, CUmipmappedArray hMipmappedArray, unsigned int  Flags );
+/*
+Binds a mipmapped array to a texture reference. */;
+
+/* ==== Surface Reference Management [DEPRECATED] ==== */;
+
+CUresult
+cuSurfRefGetArray ( CUarray* phArray, CUsurfref hSurfRef );
+/*
+Passes back the CUDA array bound to a surface reference.
+*/;
+
+CUresult
+cuSurfRefSetArray ( CUsurfref hSurfRef, CUarray hArray, unsigned int  Flags );
+/*
+Sets the CUDA array for a surface reference. */;
+
+/* ==== Texture Object Management ==== */;
+
+@LogReplay;
+CUresult
+cuTexObjectCreate ( CUtexObject* pTexObject, const CUDA_RESOURCE_DESC* pResDesc, const CUDA_TEXTURE_DESC* pTexDesc, const CUDA_RESOURCE_VIEW_DESC* pResViewDesc );
+/*
+Creates a texture object.
+*/;
+
+@LogReplay;
+CUresult
+cuTexObjectDestroy ( CUtexObject texObject );
+/*
+Destroys a texture object.
+*/;
+
+CUresult
+cuTexObjectGetResourceDesc ( CUDA_RESOURCE_DESC* pResDesc, CUtexObject texObject );
+/*
+Returns a texture object's resource descriptor.
+*/;
+
+CUresult
+cuTexObjectGetResourceViewDesc ( CUDA_RESOURCE_VIEW_DESC* pResViewDesc, CUtexObject texObject );
+/*
+Returns a texture object's resource view descriptor.
+*/;
+
+CUresult
+cuTexObjectGetTextureDesc ( CUDA_TEXTURE_DESC* pTexDesc, CUtexObject texObject );
+/*
+Returns a texture object's texture descriptor. */;
+
+/* ==== Surface Object Management ==== */;
+
+@LogReplay;
+CUresult
+cuSurfObjectCreate ( CUsurfObject* pSurfObject, const CUDA_RESOURCE_DESC* pResDesc );
+/*
+Creates a surface object.
+*/;
+
+@LogReplay;
+CUresult
+cuSurfObjectDestroy ( CUsurfObject surfObject );
+/*
+Destroys a surface object.
+*/;
+
+CUresult
+cuSurfObjectGetResourceDesc ( CUDA_RESOURCE_DESC* pResDesc, CUsurfObject surfObject );
+/*
+Returns a surface object's resource descriptor. */;
+
+/* ==== Peer Context Memory Access  ==== */;
+
+
+CUresult
+cuCtxDisablePeerAccess ( CUcontext peerContext );
+/*
+Disables direct access to memory allocations in a peer context and unregisters any registered allocations.
+*/;
+
+CUresult
+cuCtxEnablePeerAccess ( CUcontext peerContext, unsigned int  Flags );
+/*
+Enables direct access to memory allocations in a peer context.
+*/;
+
+CUresult
+cuDeviceCanAccessPeer ( int* canAccessPeer, CUdevice dev, CUdevice peerDev );
+/*
+Queries if a device may directly access a peer device's memory.
+*/;
+
+CUresult
+cuDeviceGetP2PAttribute ( int* value, CUdevice_P2PAttribute attrib, CUdevice srcDevice, CUdevice dstDevice );
+/*
+Queries attributes of the link between two devices. */;
+
+/* ==== Graphics Interoperability ==== */;
+
+CUresult
+cuGraphicsMapResources ( unsigned int  count, CUgraphicsResource* resources, CUstream hStream );
+/*
+Map graphics resources for access by CUDA.
+*/;
+
+CUresult
+cuGraphicsResourceGetMappedMipmappedArray ( CUmipmappedArray* pMipmappedArray, CUgraphicsResource resource );
+/*
+Get a mipmapped array through which to access a mapped graphics resource.
+*/;
+
+CUresult
+cuGraphicsResourceGetMappedPointer_v2 ( CUdeviceptr* pDevPtr, size_t* pSize, CUgraphicsResource resource );
+/*
+Get a device pointer through which to access a mapped graphics resource.
+*/;
+
+CUresult
+cuGraphicsResourceSetMapFlags_v2 ( CUgraphicsResource resource, unsigned int  flags );
+/*
+Set usage flags for mapping a graphics resource.
+*/;
+
+CUresult
+cuGraphicsSubResourceGetMappedArray ( CUarray* pArray, CUgraphicsResource resource, unsigned int  arrayIndex, unsigned int  mipLevel );
+/*
+Get an array through which to access a subresource of a mapped graphics resource.
+*/;
+
+CUresult
+cuGraphicsUnmapResources ( unsigned int  count, CUgraphicsResource* resources, CUstream hStream );
+/*
+Unmap graphics resources.
+*/;
+
+CUresult
+cuGraphicsUnregisterResource ( CUgraphicsResource resource );
+/*
+Unregisters a graphics resource for access by CUDA.
+*/;
+
+void                                                                            
+__cudaRegisterFatBinaryEnd(void **fatCubinHandle);
