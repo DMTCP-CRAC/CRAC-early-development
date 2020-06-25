@@ -136,7 +136,7 @@ mtcp_write_non_rwx_and_anonymous_pages(int fd, Area *orig_area)
   if ((orig_area->prot & PROT_READ) == 0) {
     JASSERT(mprotect(orig_area->addr, orig_area->size,
                      orig_area->prot | PROT_READ) == 0)
-      (JASSERT_ERRNO) (orig_area->size) (orig_area->addr)
+      (JASSERT_ERRNO) (orig_area->size) ((void *)orig_area->addr)
     .Text("error adding PROT_READ to mem region");
   }
 
@@ -160,7 +160,7 @@ mtcp_write_non_rwx_and_anonymous_pages(int fd, Area *orig_area)
     } else {
       if (madvise(a.addr, a.size, MADV_DONTNEED) == -1) {
         JNOTE("error doing madvise(..., MADV_DONTNEED)")
-          (JASSERT_ERRNO) (a.addr) ((int)a.size);
+          (JASSERT_ERRNO) ((void *)a.addr) ((int)a.size);
       }
     }
     area.addr += size;
@@ -171,7 +171,7 @@ mtcp_write_non_rwx_and_anonymous_pages(int fd, Area *orig_area)
   */
   if ((orig_area->prot & PROT_READ) == 0) {
     JASSERT(mprotect(orig_area->addr, orig_area->size, orig_area->prot) == 0)
-      (JASSERT_ERRNO) (orig_area->addr) (orig_area->size)
+      (JASSERT_ERRNO) ((void *)orig_area->addr) (orig_area->size)
     .Text("error removing PROT_READ from mem region.");
   }
 }
@@ -371,7 +371,8 @@ dmtcp_skip_memory_region_ckpting(ProcMapsArea *area, int fd, int stack_was_seen)
       }
     } else if (regionContains(area->addr, area->endAddr,
                               uhMmapStart, uhMmapEnd)) {
-      JNOTE("Case 4: detected") (area->addr) (area->endAddr) (area->size);
+      JNOTE("Case 4: detected") ((void*)area->addr) 
+        ((void *)area->endAddr) (area->size);
       fflush(stdout);
       // TODO: this usecase is not completed; fix it later
       // int dummy = 1; while(dummy);
