@@ -245,14 +245,6 @@ regionContains(const void *haystackStart,
   return needleStart >= haystackStart && needleEnd <= haystackEnd;
 }
 
-bool isMergeable(MmapInfo_t first, MmapInfo_t second) {
-  void * first_end_addr = (void *)((uint64_t)first.addr + first.len);
-  if (first_end_addr == second.addr) {
-    return true;
-  }
-  return false;
-}
-
 void getAndMergeUhMaps()
 {
   if (lhInfo.lhMmapListFptr && fnc == NULL) {
@@ -264,10 +256,28 @@ void getAndMergeUhMaps()
     merged_uhmaps.push_back(uh_mmaps[0]);
     for(size_t i = 1; i < uh_mmaps.size(); i++) {
       MmapInfo_t last_merged = merged_uhmaps.back();
-      if (isMergeable(last_merged, uh_mmaps[i])) {
-        MmapInfo_t merged_item;
-        merged_item.addr = last_merged.addr;
-        merged_item.len = last_merged.len + uh_mmaps[i].len;
+      void *uhMmapStart = uh_mmaps[i].addr;
+      void *uhMmapEnd = (VA)uh_mmaps[i].addr + uh_mmaps[i].len;
+      void *lastmergedStart = last_merged.addr;
+      void *lastmergedEnd = (VA)last_merged.addr + last_merged.len;
+      MmapInfo_t merged_item;
+      if (regionContains(uhMmapStart, uhMmapEnd, 
+                         lastmergedStart, lastmergedEnd)) {
+        merged_uhmaps.pop_back();
+        merged_uhmaps.push_back(uh_mmaps[i]);
+      } else if (regionContains(lastmergedStart, lastmergedEnd,
+                                uhMmapStart, uhMmapEnd)) {
+        continue;
+      } else if (lastmergedStart > uhMmapStart 
+                 && uhMmapEnd >= lastmergedStart) {
+        merged_item.addr = uhMmapStart;
+        merged_item.len = (VA)lastmergedEnd - (VA)uhMmapStart;
+        merged_uhmaps.pop_back();
+        merged_uhmaps.push_back(merged_item);
+      } else if (lastmergedStart < uhMmapStart 
+                 && lastmergedEnd >= uhMmapStart) {
+        merged_item.addr = lastmergedStart;
+        merged_item.len = (VA)uhMmapEnd - (VA)lastmergedStart;
         merged_uhmaps.pop_back();
         merged_uhmaps.push_back(merged_item);
       } else {
