@@ -243,7 +243,7 @@ restoreMemoryRegion(int ckptfd, Area* area)
     // NOTE: We mmap using our wrapper to track the upper half regions. This
     // enables the upper half to request for another checkpoint post restart.
     mmappedat = mmapWrapper(area->addr, area->size, area->prot,
-                       MAP_FIXED | MAP_PRIVATE | MAP_ANONYMOUS, imagefd, area->offset);
+                            area->flags, imagefd, area->offset);
     if (mmappedat == MAP_FAILED) {
       DLOG(ERROR, "Mapping failed for memory region (%s) at: %p of: %zu bytes. "
            "Error: %s\n", area->name, area->addr, area->size, strerror(errno));
