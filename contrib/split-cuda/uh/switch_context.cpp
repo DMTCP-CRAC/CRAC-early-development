@@ -59,13 +59,13 @@ SwitchContext::~SwitchContext()
     // The JUMP_TO_LOWER_HALF and RETURN_TO_UPPER_HALF macros are called
     // before and after a system call.
     // saved_errno is used to restore the errno of the system call.
-    int saved_errno = errno;
+  //  int saved_errno = errno;
     int rc = syscall(SYS_arch_prctl, ARCH_SET_FS, this->upperHalfFs);
     if (rc < 0) {
       printf("failed to get fs: %d\n", errno);
       exit(-1);
     }
     // restore errno
-    errno = saved_errno;
+//    errno = saved_errno;
   }
 }

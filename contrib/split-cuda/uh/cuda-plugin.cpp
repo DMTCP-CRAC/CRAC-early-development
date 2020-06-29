@@ -69,6 +69,12 @@ GetMmappedListFptr_t fnc = NULL;
 dmtcp::vector<MmapInfo_t> merged_uhmaps;
 UpperHalfInfo_t uhInfo;
 
+//global_fatCubinHandle upper half variable containing 
+//the cuda handle returned by cudaRegisterFatBinary()
+void ** global_fatCubinHandle=NULL;
+fatHandle_t fat=NULL;
+
+
 static bool skipWritingTextSegments = false;
 extern "C" pid_t dmtcp_get_real_pid();
 /* This function returns a range of zero or non-zero pages. If the first page
@@ -573,6 +579,10 @@ void restart()
 {
   reset_wrappers();
   initialize_wrappers();
+  fat = (fatHandle_t) lhInfo.getFatCubinHandle;
+  //this global_fatCubinHandle was intended to be used
+  //from the cudaUnregisterFatBinary wrapper function
+  global_fatCubinHandle=fat();
   // fix lower-half fs
   unsigned long addr = 0;
   syscall(SYS_arch_prctl, ARCH_GET_FS, &addr);

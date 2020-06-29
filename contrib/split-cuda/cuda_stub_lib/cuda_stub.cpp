@@ -2172,7 +2172,7 @@ extern "C" CUresult cuGraphicsUnregisterResource ( CUgraphicsResource resource )
   return ret_val;
 }
 
-extern "C" void  __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
+extern "C" void                                                                             __cudaRegisterFatBinaryEnd(void **fatCubinHandle) {
   assert(0);
 }
 
