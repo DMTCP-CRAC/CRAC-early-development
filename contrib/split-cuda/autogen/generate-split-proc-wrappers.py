@@ -198,25 +198,22 @@ def emit_wrapper(decl, ret_type, fnc, args, arg_vars, logging):
     fat= True;
   elif fnc == "__cudaUnregisterFatBinary":
     print("  fatHandle_t fat= NULL;")
+    print(" // fat = (fatHandle_t)lhInfo.new_getFatCubinHandle;")
     print("  fat = (fatHandle_t)lhInfo.getFatCubinHandle;")
-    print("  fatCubinHandle = fat();")
     unreg= True;
   print("  DMTCP_PLUGIN_DISABLE_CKPT();")
   if (unreg):
-      print("if (fat() == NULL) {")
+      print("  if (fat() == NULL) {")
+      print("   fatCubinHandle = global_fatCubinHandle;")
+      print("  } else {")
+      print("   fatCubinHandle = fat();")
+      print("  }");
       print("  JUMP_TO_LOWER_HALF(lhInfo.lhFsAddr);")
-      print("  REAL_FNC(" + strip_fnc(fnc) + ")(" + " global_fatCubinHandle " + ");") 
+      print("  REAL_FNC(" + strip_fnc(fnc) + ")(" + " fatCubinHandle " + ");") 
       print("  RETURN_TO_UPPER_HALF();")
       if(logging):
         print("/* Insert logging code here */")
-        print("  logAPI(Cuda_Fnc_"+ fnc + ", " +  "global_fatCubinHandle" + ");")
-      print("  } else {")
-      print(" // JUMP_TO_LOWER_HALF(lhInfo.lhFsAddr);")
-      print(" // REAL_FNC(" + strip_fnc(fnc) + ")(" + " fatCubinHandle " + ");") 
-      print(" // RETURN_TO_UPPER_HALF();")
-      if(logging):
-        print(" // logAPI(Cuda_Fnc_"+ fnc + ", " +  " fatCubinHandle" + ");")
-      print("}");
+        print("  logAPI(Cuda_Fnc_"+ fnc + ", " +  "fatCubinHandle" + ");")
   else:
    print("  JUMP_TO_LOWER_HALF(lhInfo.lhFsAddr);")
    if ret_type != "void":

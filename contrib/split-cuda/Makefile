@@ -121,14 +121,15 @@ ${TARGET_OBJS}: test/target.c
 
 ${TARGET_BIN}: ${TARGET_OBJS}
 	${LD} test/$< -o test/$@ -L. -l${WRAPPER_LIB};
-	${NVCC} -g test/$< -o test/target.exe
+	${NVCC} -g test/$< -lcudart -o test/target.exe
 
 
 # Apparently, Nvidia libraries don't like -pie; so, we are forced
 # to link the kernel loader (which is really just emulating the lower
 # half) to a fixed address (0x800000)
 ${KERNEL_LOADER_BIN}: ${KERNEL_LOADER_OBJS}
-	${NVCC} ${NVCC_FLAGS} $^ -o $@ -lcuda -ldl -lcublas -lcusparse -lcusolver
+	#${NVCC} ${NVCC_FLAGS} -L/home/alienware/Documents/CRAC-monitored/CRAC-early-development/contrib/split-cuda/mylib/ $^ -o $@ -lcuda -ldl -lcublas -lcusparse -lcusolver -lwrapper
+	${NVCC} ${NVCC_FLAGS}  $^ -o $@ -lcuda -ldl  -lcusparse -lcusolver -lcublas
 
 vi vim:
 	vim ${FILE}.cpp

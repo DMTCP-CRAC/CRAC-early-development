@@ -36,7 +36,7 @@ void check_error(cudaError e);
 
 __global__ void computeGpuMMM(float *A_GPU, float *B_GPU, float *C_GPU, int width);
 __global__ void computeGpuMMM_primitive(float *A_GPU, float *B_GPU, float *C_GPU, int width, int B_D2);
-
+extern "C" void __cudaUnregisterFatBinary(void **test);
 //-------------------------------------------------------------------------------------------------------
 int main(int argc, char **argv) {
 void *cuda_ptr1 = NULL;
@@ -91,9 +91,12 @@ void *cuda_ptr1 = NULL;
 	rc = cudaMalloc(&cuda_ptr2, 43*sizeof(char));
 	printf("cudaMalloc returned: %d, cuda_ptr1: %p\n", (int)rc, cuda_ptr1);
         printf("cudaMalloc returned: %d, cuda_ptr2: %p\n", (int)rc, cuda_ptr2);
-	cudaFree(cuda_ptr1);
-        cudaFree(cuda_ptr2);
+	computeGpuMMM_primitive<<<dimGrid, dimBlock>>>(A_GPU, B_GPU, C_GPU, A_MD.dimension2, B_MD.dimension2);
+//	cudaFree(cuda_ptr1);
+  //      cudaFree(cuda_ptr2);
+//	void **bb=NULL;
 	//compareHostAndGpuOutput();	
+//	__cudaUnregisterFatBinary(bb);
 	return 0;
 }
 

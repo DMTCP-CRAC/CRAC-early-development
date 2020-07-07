@@ -1,5 +1,5 @@
 matrix_mul.o: matrix_mul.cu
-	nvcc -g -Xcompiler -g3 -O0 -c $< -o $@
+	nvcc -g -Xcompiler  -g3 -O0 -c $< -o $@ 
 
 matrix_mul.dummy.exe: matrix_mul.o
 	/usr/bin/g++-8 $< -o $@ -L../../ -lcuda_wrappers 

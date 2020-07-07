@@ -1,1 +1,0 @@
-../../bin/dmtcp_restart --cuda  $(ls -t1 ./ |grep "[.]dmtcp" |head -n 1)

@@ -115,7 +115,6 @@ extern UpperHalfInfo_t uhInfo;
 extern "C" {
 #endif
 void* lhDlsym(Cuda_Fncs_t type);
-
 void** fatHandle();
 #ifdef __cplusplus
 }

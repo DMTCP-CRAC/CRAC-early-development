@@ -43,7 +43,6 @@
 
 #include "common.h"
 #include "dmtcp.h"
-// #include "dmtcp_dlsym.h"
 #include "config.h"
 #include "jassert.h"
 #include "procmapsarea.h"
@@ -51,12 +50,7 @@
 #include "util.h"
 #include "log_and_replay.h"
 #include "mmap-wrapper.h"
-// #include "device_heap_util.h"
 #include "upper-half-wrappers.h"
-
-// #define _real_dlsym NEXT_FNC(dlsym)
-// #define _real_dlopen NEXT_FNC(dlopen)
-// #define _real_dlerror NEXT_FNC(dlerror)
 
 #define DEV_NVIDIA_STR "/dev/nvidia"
 
@@ -69,11 +63,7 @@ GetMmappedListFptr_t fnc = NULL;
 dmtcp::vector<MmapInfo_t> merged_uhmaps;
 UpperHalfInfo_t uhInfo;
 
-//global_fatCubinHandle upper half variable containing 
-//the cuda handle returned by cudaRegisterFatBinary()
-void ** global_fatCubinHandle=NULL;
-fatHandle_t fat=NULL;
-
+void** global_fatCubinHandle=NULL;
 
 static bool skipWritingTextSegments = false;
 extern "C" pid_t dmtcp_get_real_pid();
@@ -579,10 +569,6 @@ void restart()
 {
   reset_wrappers();
   initialize_wrappers();
-  fat = (fatHandle_t) lhInfo.getFatCubinHandle;
-  //this global_fatCubinHandle was intended to be used
-  //from the cudaUnregisterFatBinary wrapper function
-  global_fatCubinHandle=fat();
   // fix lower-half fs
   unsigned long addr = 0;
   syscall(SYS_arch_prctl, ARCH_GET_FS, &addr);

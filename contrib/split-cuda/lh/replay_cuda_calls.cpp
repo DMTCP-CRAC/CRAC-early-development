@@ -41,7 +41,6 @@
 #include "log_and_replay.h"
 
 void **new_fatCubinHandle = NULL;
-
 void replayAPI(CudaCallLog_t *l)
 {
   Cuda_Fncs_t op;
@@ -54,10 +53,12 @@ void replayAPI(CudaCallLog_t *l)
       memcpy(&oldDevPtr, l->fncargs + chars_read, sizeof oldDevPtr);
       chars_read += sizeof oldDevPtr;
       size_t len;
+
       memcpy(&len, l->fncargs + chars_read, sizeof len);
       void *newDevPtr = NULL;
       cudaError_t ret = cudaMalloc(&newDevPtr, len);
       assert(ret == cudaSuccess);
+
       // JASSERT(ret == cudaSuccess) ("cudaMalloc replay failed!");
       // JASSERT(newDevPtr == oldDevPtr) (oldDevPtr) (newDevPtr)
       //   .Text("new device pointer is different than old one!");
@@ -208,6 +209,14 @@ void replayAPI(CudaCallLog_t *l)
       printf("\n old fatcubinhandle = %p\n", oldRes);
       printf("fatcubinhandle = %p\n", newRes);
       new_fatCubinHandle = newRes;
+      //the __cudaRegisterFatBinaryEnd call solved the problem of segfaulting at
+      //cudaUnregisterFatBinary() 
+      //which is invoked at target program's exit
+      __cudaRegisterFatBinaryEnd(new_fatCubinHandle);
+      
+      //Another thing to investigate
+    //  void (*callback_fp)(void **) =  (void (*)(void **))(fatCubin); 
+    //  (*callback_fp)(new_fatCubinHandle);
       // JASSERT(memcmp(&oldRes, *newRes, sizeof(*newRes))!= 0)
       //   .Text("old and new results are not same!");
       break;
@@ -677,6 +686,10 @@ void replayAPI(CudaCallLog_t *l)
       cudaDeviceSynchronize();
       break;
     }
+    //sth about cudaStreamCreate
+    //if it is used in a program it will affect
+    //the deterministism of cudaMalloc
+    //mrCUDA
     case GENERATE_ENUM(cudaStreamCreate):
     {
       cudaStream_t *pStream;
@@ -1164,7 +1177,7 @@ void** fatHandle(){
 // function on each call log object
 // void logs_read_and_apply(void (*apply)(CudaCallLog_t *l))
 void logs_read_and_apply()
-{
+{ 
   GetCudaCallsLogFptr_t fnc = (GetCudaCallsLogFptr_t)uhInfo.cudaLogVectorFptr;
   std::vector<CudaCallLog_t>& cudaCallsLog = fnc();
   for (auto it = cudaCallsLog.begin(); it != cudaCallsLog.end(); it++) {
