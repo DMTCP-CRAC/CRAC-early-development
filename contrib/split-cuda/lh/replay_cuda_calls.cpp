@@ -212,8 +212,13 @@ void replayAPI(CudaCallLog_t *l)
       //the __cudaRegisterFatBinaryEnd call solved the problem of segfaulting at
       //cudaUnregisterFatBinary() 
       //which is invoked at target program's exit
+      //Why this call was not logged?
+      //If this CUDA version needs it
+      //The cuda 10.0 does not need this call
+      //But 10.2 does.
+#if CUDA_VERSION >= 10020
       __cudaRegisterFatBinaryEnd(new_fatCubinHandle);
-      
+#endif
       //Another thing to investigate
     //  void (*callback_fp)(void **) =  (void (*)(void **))(fatCubin); 
     //  (*callback_fp)(new_fatCubinHandle);
