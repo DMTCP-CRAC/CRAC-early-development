@@ -243,6 +243,17 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
       memcpy(log.results, res, sizeof (*res));
       break;
     }
+    // new
+    case GENERATE_ENUM(__cudaRegisterFatBinaryEnd):
+    {
+      // args
+      void **fatCubinHandle = va_arg(arglist, void **);
+      memcpy(buf + chars_wrote, &fatCubinHandle, sizeof (void *));
+      chars_wrote += sizeof (void *);
+
+      break;
+    }
+
     case GENERATE_ENUM(__cudaUnregisterFatBinary):
     {
       // args

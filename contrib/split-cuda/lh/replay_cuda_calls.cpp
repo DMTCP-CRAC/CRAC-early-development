@@ -209,23 +209,19 @@ void replayAPI(CudaCallLog_t *l)
       printf("\n old fatcubinhandle = %p\n", oldRes);
       printf("fatcubinhandle = %p\n", newRes);
       new_fatCubinHandle = newRes;
-      //the __cudaRegisterFatBinaryEnd call solved the problem of segfaulting at
-      //cudaUnregisterFatBinary() 
-      //which is invoked at target program's exit
-      //Why this call was not logged?
-      //If this CUDA version needs it
-      //The cuda 10.0 does not need this call
-      //But 10.2 does.
-#if CUDA_VERSION >= 10020
-      __cudaRegisterFatBinaryEnd(new_fatCubinHandle);
-#endif
-      //Another thing to investigate
-    //  void (*callback_fp)(void **) =  (void (*)(void **))(fatCubin); 
-    //  (*callback_fp)(new_fatCubinHandle);
       // JASSERT(memcmp(&oldRes, *newRes, sizeof(*newRes))!= 0)
       //   .Text("old and new results are not same!");
       break;
     }
+  case GENERATE_ENUM(__cudaRegisterFatBinaryEnd):
+    {
+      // replay
+      // This call was introduced in CUDA 10.2
+      // CUDA 10.2 will fail without this call
+      __cudaRegisterFatBinaryEnd(new_fatCubinHandle);
+      break;
+    }
+
     case GENERATE_ENUM(__cudaUnregisterFatBinary):
     {
       void *fatCubinHandle;
