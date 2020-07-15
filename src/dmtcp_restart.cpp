@@ -26,6 +26,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include <sys/personality.h>
 #include "config.h"
 #ifdef HAS_PR_SET_PTRACER
 #include <sys/prctl.h>
@@ -526,6 +527,7 @@ runMtcpRestart(int is32bitElf, int fd, ProcessInfo *pInfo)
 
   // last argument
   newArgs.push_back(NULL);
+  personality(ADDR_NO_RANDOMIZE);
   execve(newArgs[0], &newArgs[0], environ);
   JASSERT(false) (newArgs[0]) (newArgs[1]) (JASSERT_ERRNO)
   .Text("exec() failed");

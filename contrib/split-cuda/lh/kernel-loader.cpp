@@ -21,6 +21,7 @@
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#define CUDA 1
 #endif
 #include <assert.h>
 #include <dlfcn.h>
