@@ -41,4 +41,5 @@
 
 #define DECLARE_WRAPPER(rettype, fnc, args) \
   extern rettype fnc args __attribute__((weak));
+void **global_fatCubinHandle=NULL;
 #endif // ifndef UPPER_HALF_CUDA_WRAPPERS_H

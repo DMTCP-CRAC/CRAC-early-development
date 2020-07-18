@@ -63,8 +63,6 @@ GetMmappedListFptr_t fnc = NULL;
 dmtcp::vector<MmapInfo_t> merged_uhmaps;
 UpperHalfInfo_t uhInfo;
 
-void** global_fatCubinHandle=NULL;
-
 static bool skipWritingTextSegments = false;
 extern "C" pid_t dmtcp_get_real_pid();
 /* This function returns a range of zero or non-zero pages. If the first page
@@ -572,6 +570,11 @@ void restart()
   // fix lower-half fs
   unsigned long addr = 0;
   syscall(SYS_arch_prctl, ARCH_GET_FS, &addr);
+  // We copy the upper-half's FS register's magic number (addr+40) into 
+  // the lower-half's FS register magic number (lhFsAddr+40) 
+  // The lhInfo.lhFsAddr+40 contains an old magic number from the previous
+  // program execution. This old magic number should be updated to the new one
+  // Otherwise context switching would fail.
   memcpy((long *)((VA)lhInfo.lhFsAddr+40), (long *)(addr+40), sizeof(long));
   JNOTE("upper-half FS") ((void *)addr);
   JNOTE("lower-half FS") ((void *)lhInfo.lhFsAddr);
