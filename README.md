@@ -4,6 +4,7 @@
 
 * [Introduction](#introduction)
 * [TODO](#todo)
+* [CITATION](#citation)
 * [DMTCP](#dmtcp)
 
 ## Introduction
@@ -11,9 +12,17 @@ This is a new DMTCP(https://github.com/dmtcp/dmtcp.git) plugin to checkpoint-
 restart CUDA application with noval split-process architecture. The Plugin code is in the contrib/split-cuda directory. CRAC consists of the plugin on top of DMTCP.
 
 ## TODO
-We are in the process of porting our code that is developed for the cluster's
-specific environment to make it more general.
+We are in the process of porting our code.  It was developed for a development cluster's
+specific environment.  The version here is intended to run on all recent-model NVIDIA GPUs.
+We have not yet finished porting the development code.  For example, the version on the development
+cluster correctly runs Gromacs, but we have not yet fixed that bug for this version.
 
+## CITATION
+The citation of this work is an accepted paper at SC'20.  The citation will be provided
+here when the SC proceedings are available.  In the meantime, there is a technical
+report at arxiv.org, under the title:<br>
+_CRAC: Checkpoint-Restart Architecture for CUDA with Streams and UVM_<br>
+by Twinkle Jain and Gene Cooperman
 
 ## DMTCP: Distributed MultiThreaded CheckPointing 
 (http://dmtcp.sourceforge.net/) [![Build Status](https://travis-ci.org/dmtcp/dmtcp.png?branch=master)](https://travis-ci.org/dmtcp/dmtcp)
