@@ -509,7 +509,14 @@ runMtcpRestart(int is32bitElf, int fd, ProcessInfo *pInfo)
     // If mtcp_restart_pause == true, mtcp_restart will invoke
     //     postRestartDebug() in the checkpoint image instead of postRestart().
   }
-  static string kernelLoader = Util::getPath("kernel-loader.exe");
+  //Need to fix Util::getPath to be aware of the mounted dmtcp dir inside Singularity
+  //container
+  static string kl;
+  const char *kernelString="kernel-loader.exe";
+#ifdef SINGULARITY
+  kl= "/.dmtcp/CRAC-early-development/contrib/split-cuda/";
+#endif //SINGULARITY
+  static string kernelLoader = Util::getPath((kl+kernelString).c_str());
   vector<char *> newArgs;
   if (runMtcpSplitProcess) {
     newArgs.push_back((char *)kernelLoader.c_str());

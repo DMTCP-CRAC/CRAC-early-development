@@ -114,9 +114,6 @@
 /* No output, not even NOTE and WARNING */
 #undef QUIET
 
-/* USE ONLY WITH Singularity Plugin */
-#undef SINGULARITY
-
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
 

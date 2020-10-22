@@ -119,6 +119,21 @@ if test "$use_jtiming" = "yes"; then
   AC_DEFINE([TIMING],[1],[Record timing information to stderr and jtimings.csv])
 fi
 
+AC_ARG_ENABLE([singularity],
+            [AS_HELP_STRING([--enable-singularity],
+                            [this is used alongside the singularity plugin
+                             it allows singularity to find the executables,
+                             in working directories
+                            ])],
+            [use_singularity=$enableval],
+            [use_singularity=no])
+
+
+if test "$use_singularity" = "yes"; then
+  AC_DEFINE([SINGULARITY],[1],[USE ONLY WITH Singularity Plugin])
+fi
+
+
 AC_ARG_ENABLE([realtime_ckpt_signal],
             [AS_HELP_STRING([--enable-realtime-ckpt-signal],
                             [Use a realtime signal (SIGRTMAX - 2) instead of
