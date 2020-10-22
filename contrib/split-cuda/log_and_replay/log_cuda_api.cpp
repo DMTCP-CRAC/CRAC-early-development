@@ -1147,6 +1147,9 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
   log.fncargs = (char *)JALLOC_MALLOC(chars_wrote);
   memcpy(log.fncargs, buf, chars_wrote);
   log.size = chars_wrote;
+  //push_back fails/segfaults when a lot of cuda Calls are made
+  //To avoid the segfault we can resize cudaCallsLog
+  cudaCallsLog.resize(log.size);
   cudaCallsLog.push_back(log);
   va_end(arglist);
 }
