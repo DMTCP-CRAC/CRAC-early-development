@@ -73,7 +73,8 @@ getCudaCallsLog() {
 void display_map()
 {
   for (auto lh_page : lh_pages_map) {
-    printf("\n Address = %p with size = %lu", lh_page.first, lh_page.second.mem_len);
+    printf("\n Address = %p with size = %lu", \
+     lh_page.first, lh_page.second.mem_len);
   }
 }
 
@@ -352,7 +353,8 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
       chars_wrote += sizeof (*fatCubinHandle);
 
       void **hostVarPtrAddress = va_arg(arglist, void **);
-      memcpy(buf + chars_wrote, &hostVarPtrAddress, sizeof (*hostVarPtrAddress));
+      memcpy(buf + chars_wrote, &hostVarPtrAddress, \
+      sizeof (*hostVarPtrAddress));
       chars_wrote += sizeof (*hostVarPtrAddress);
 
       char *deviceAddress = va_arg(arglist, char *);
@@ -560,7 +562,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaMallocHost):
     {
-      //args
+      // args
       void ** ptr = va_arg(arglist, void **);
       memcpy(buf + chars_wrote, &ptr, sizeof(void *));
       chars_wrote += sizeof(void *);
@@ -572,7 +574,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuMemAllocHost_v2):
     {
-      //args
+      // args
       void ** ptr = va_arg(arglist, void **);
       memcpy(buf + chars_wrote, &ptr, sizeof(void *));
       chars_wrote += sizeof(void *);
@@ -584,7 +586,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaFreeHost):
     {
-      //args
+      // args
       void * ptr = va_arg(arglist, void *);
       memcpy(buf + chars_wrote, &ptr, sizeof(void *));
       chars_wrote += sizeof(void *);
@@ -592,7 +594,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuMemFreeHost):
     {
-      //args
+      // args
       void * ptr = va_arg(arglist, void *);
       memcpy(buf + chars_wrote, &ptr, sizeof(void *));
       chars_wrote += sizeof(void *);
@@ -600,7 +602,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaHostAlloc):
     {
-      //args
+      // args
       void ** ptr = va_arg(arglist, void **);
       memcpy(buf + chars_wrote, &ptr, sizeof(ptr));
       chars_wrote += sizeof(ptr);
@@ -616,7 +618,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuMemHostAlloc):
     {
-      //args
+      // args
       void ** ptr = va_arg(arglist, void **);
       memcpy(buf + chars_wrote, &ptr, sizeof(ptr));
       chars_wrote += sizeof(ptr);
@@ -682,7 +684,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaMallocManaged):
     {
-      //args
+      // args
       void ** devPtr = va_arg(arglist, void **);
       // memcpy(buf + chars_wrote, *devPtr, sizeof(devPtr));
       memcpy(buf + chars_wrote, *devPtr, sizeof(devPtr));
@@ -703,7 +705,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuMemAllocManaged):
     {
-      //args
+      // args
       CUdeviceptr * devPtr = va_arg(arglist, CUdeviceptr*);
       // memcpy(buf + chars_wrote, *devPtr, sizeof(devPtr));
       memcpy(buf + chars_wrote, &devPtr, sizeof(devPtr));
@@ -724,7 +726,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaStreamCreate):
     {
-      //args
+      // args
       cudaStream_t *pStream = va_arg(arglist, cudaStream_t *);
       memcpy(buf + chars_wrote, &pStream, sizeof(pStream));
       chars_wrote += sizeof(pStream);
@@ -732,7 +734,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuStreamCreate):
     {
-      //args
+      // args
       CUstream *phStream = va_arg(arglist, CUstream *);
       memcpy(buf + chars_wrote, &phStream, sizeof(phStream));
       chars_wrote += sizeof(phStream);
@@ -744,7 +746,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaStreamCreateWithFlags):
     {
-      //args
+      // args
       cudaStream_t *pStream = va_arg(arglist, cudaStream_t *);
       memcpy(buf + chars_wrote, &pStream, sizeof(pStream));
       chars_wrote += sizeof(pStream);
@@ -756,7 +758,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaStreamCreateWithPriority):
     {
-      //args
+      // args
       cudaStream_t *pStream = va_arg(arglist, cudaStream_t *);
       memcpy(buf + chars_wrote, &pStream, sizeof(pStream));
       chars_wrote += sizeof(pStream);
@@ -772,7 +774,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuStreamCreateWithPriority):
     {
-      //args
+      // args
       CUstream *phStream = va_arg(arglist, CUstream *);
       memcpy(buf + chars_wrote, &phStream, sizeof(phStream));
       chars_wrote += sizeof(phStream);
@@ -788,7 +790,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cudaStreamDestroy):
     {
-      //args
+      // args
       cudaStream_t pStream = va_arg(arglist, cudaStream_t);
       memcpy(buf + chars_wrote, &pStream, sizeof(pStream));
       chars_wrote += sizeof(pStream);
@@ -796,7 +798,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
     }
     case GENERATE_ENUM(cuStreamDestroy_v2):
     {
-      //args
+      // args
       CUstream hStream = va_arg(arglist, CUstream);
       memcpy(buf + chars_wrote, &hStream, sizeof(hStream));
       chars_wrote += sizeof(hStream);
@@ -919,7 +921,8 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
       memcpy(buf + chars_wrote, &pTexDesc, sizeof(pTexDesc));
       chars_wrote += sizeof(pTexDesc);
 
-      CUDA_RESOURCE_VIEW_DESC* pResViewDesc = va_arg(arglist, CUDA_RESOURCE_VIEW_DESC *);
+      CUDA_RESOURCE_VIEW_DESC* pResViewDesc = \
+      va_arg(arglist, CUDA_RESOURCE_VIEW_DESC *);
       memcpy(buf + chars_wrote, &pResViewDesc, sizeof(pResViewDesc));
       chars_wrote += sizeof(pResViewDesc);
       break;
@@ -1122,7 +1125,8 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
 
       CUDA_ARRAY3D_DESCRIPTOR* pMipmappedArrayDesc = \
             va_arg(arglist, CUDA_ARRAY3D_DESCRIPTOR *);
-      memcpy(buf + chars_wrote, &pMipmappedArrayDesc, sizeof(pMipmappedArrayDesc));
+      memcpy(buf + chars_wrote, &pMipmappedArrayDesc, \
+      sizeof(pMipmappedArrayDesc));
       chars_wrote += sizeof(pMipmappedArrayDesc);
 
       unsigned int numMipmapLevels = va_arg(arglist, unsigned int);
@@ -1147,9 +1151,13 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
   log.fncargs = (char *)JALLOC_MALLOC(chars_wrote);
   memcpy(log.fncargs, buf, chars_wrote);
   log.size = chars_wrote;
-  //push_back fails/segfaults when a lot of cuda Calls are made
-  //To avoid the segfault we can resize cudaCallsLog
-  cudaCallsLog.resize(log.size);
+
+  // push_back fails/segfaults when a lot of cuda Calls are made
+  // To avoid the segfault we can resize cudaCallsLog
+  // However this will be destructive at restart;
+  // lets use reserve for Now...
+  // cudaCallsLog.resize(log.size);
+  cudaCallsLog.reserve(log.size);
   cudaCallsLog.push_back(log);
   va_end(arglist);
 }
