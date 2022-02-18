@@ -28,9 +28,9 @@
 #include <linux/limits.h>
 
 // Logging levels
-#define NOISE 3 // Noise!
+#define NOISE 3 // Verbose
 #define INFO  2 // Informational logs
-#define ERROR 1 // Highest error/exception level
+#define ERROR 1 // Error logs
 
 #define KNRM  "\x1B[0m"
 #define KRED  "\x1B[31m"
@@ -41,21 +41,23 @@
 #define KCYN  "\x1B[36m"
 #define KWHT  "\x1B[37m"
 
-static const char *colors[] = {KNRM, KRED, KBLU, KGRN, KYEL};
+static const char *colors[] = {KNRM, KRED, KGRN, KYEL};
 
 #ifndef DEBUG_LEVEL
 // Let's announce errors out loud
 # define DEBUG_LEVEL 1
 #endif // ifndef DEBUG_LEVEL
 
+#define CLOG(LOG_LEVEL, fmt, ...)                                              \
+      fprintf(stderr, "%s[%s +%d]: " fmt KNRM, colors[LOG_LEVEL], __FILE__,    \
+              __LINE__, ##__VA_ARGS__);                                        \
+
 #define DLOG(LOG_LEVEL, fmt, ...)                                              \
 do {                                                                           \
   if (DEBUG_LEVEL) {                                                           \
     if (LOG_LEVEL <= DEBUG_LEVEL)                                              \
-      fprintf(stderr, "%s[%s +%d]: " fmt KNRM, colors[LOG_LEVEL], __FILE__,    \
-              __LINE__ __VA_OPT__(, ) __VA_ARGS__);                            \
+      CLOG(LOG_LEVEL, fmt, ##__VA_ARGS__)                                      \
   }                                                                            \
 } while(0)
-
 
 #endif // ifndef LOGGING_H
