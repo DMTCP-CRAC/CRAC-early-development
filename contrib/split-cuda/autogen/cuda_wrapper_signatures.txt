@@ -498,23 +498,28 @@ cusparseStatus_t
 cusparseDestroyMatDescr (cusparseMatDescr_t descrA);
 
 /* hybrid (HYB) format */;
+@VERSION_10;
 @LogReplay;
 cusparseStatus_t
 cusparseCreateHybMat(cusparseHybMat_t *hybA);
 
+@VERSION_10;
 @LogReplay;
 cusparseStatus_t
 cusparseDestroyHybMat(cusparseHybMat_t hybA);
 
 /* sparse triangular solve and incomplete-LU and Cholesky (algorithm 1) */;
+@VERSION_10;
 @LogReplay;
 cusparseStatus_t
 cusparseCreateSolveAnalysisInfo(cusparseSolveAnalysisInfo_t *info);
 
+@VERSION_10;
 @LogReplay;
 cusparseStatus_t
 cusparseDestroySolveAnalysisInfo(cusparseSolveAnalysisInfo_t info);
 
+@VERSION_10;
 cusparseStatus_t
 cusparseDcsr2csc(cusparseHandle_t handle,
                 int m,
@@ -528,6 +533,7 @@ cusparseDcsr2csc(cusparseHandle_t handle,
                 int *cscSortedColPtr,
                 cusparseAction_t copyValues,
                 cusparseIndexBase_t idxBase);
+@VERSION_10;
 cusparseStatus_t
 cusparseDcsr2hyb(cusparseHandle_t handle,
                 int m,
@@ -539,6 +545,7 @@ cusparseDcsr2hyb(cusparseHandle_t handle,
                 cusparseHybMat_t hybA,
                 int userEllWidth,
                 cusparseHybPartition_t partitionType);
+@VERSION_10;
 cusparseStatus_t
 cusparseDcsrmv(cusparseHandle_t handle,
               cusparseOperation_t transA,
@@ -553,6 +560,7 @@ cusparseDcsrmv(cusparseHandle_t handle,
               const double *x,
               const double *beta,
               double *y);
+@VERSION_10;
 cusparseStatus_t
 cusparseDcsrsv_analysis(cusparseHandle_t handle,
                         cusparseOperation_t transA,
@@ -564,6 +572,7 @@ cusparseDcsrsv_analysis(cusparseHandle_t handle,
                         const int *csrSortedColIndA,
                         cusparseSolveAnalysisInfo_t info);
 
+@VERSION_10;
 cusparseStatus_t
 cusparseDcsrsv_solve(cusparseHandle_t handle,
                     cusparseOperation_t transA,
@@ -576,6 +585,7 @@ cusparseDcsrsv_solve(cusparseHandle_t handle,
                     cusparseSolveAnalysisInfo_t info,
                     const double *f,
                     double *x);
+@VERSION_10;
 cusparseStatus_t
 cusparseDhyb2csr(cusparseHandle_t handle,
                 const cusparseMatDescr_t descrA,
@@ -583,6 +593,7 @@ cusparseDhyb2csr(cusparseHandle_t handle,
                 double *csrSortedValA,
                 int *csrSortedRowPtrA,
                 int *csrSortedColIndA);
+@VERSION_10;
 cusparseStatus_t
 cusparseDhybmv(cusparseHandle_t handle,
               cusparseOperation_t transA,
@@ -753,14 +764,30 @@ cuDevicePrimaryCtxGetState ( CUdevice dev, unsigned int* flags, int* active );
 Get the state of the primary context.
 */;
 
+@VERSION_10;
 CUresult
 cuDevicePrimaryCtxRelease ( CUdevice dev );
 /*
 Release the primary context on the GPU.
 */;
 
+@VERSION_11;
+CUresult
+cuDevicePrimaryCtxRelease_v2 ( CUdevice dev );
+/*
+Release the primary context on the GPU.
+*/;
+
+@VERSION_10;
 CUresult
 cuDevicePrimaryCtxReset ( CUdevice dev );
+/*
+Destroy all allocations and reset all state on the primary context.
+*/;
+
+@VERSION_11;
+CUresult
+cuDevicePrimaryCtxReset_v2 ( CUdevice dev );
 /*
 Destroy all allocations and reset all state on the primary context.
 */;
@@ -771,8 +798,16 @@ cuDevicePrimaryCtxRetain ( CUcontext* pctx, CUdevice dev );
 Retain the primary context on the GPU.
 */;
 
+@VERSION_10;
 CUresult
 cuDevicePrimaryCtxSetFlags ( CUdevice dev, unsigned int  flags );
+/*
+Set flags for the primary context.
+*/;
+
+@VERSION_11;
+CUresult
+cuDevicePrimaryCtxSetFlags_v2 ( CUdevice dev, unsigned int  flags );
 /*
 Set flags for the primary context.
 */;
@@ -1057,8 +1092,16 @@ cuIpcOpenEventHandle ( CUevent* phEvent, CUipcEventHandle handle );
 Opens an interprocess event handle for use in the current process.
 */;
 
+@VERSION_10;
 CUresult
 cuIpcOpenMemHandle ( CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int  Flags );
+/*
+Opens an interprocess memory handle exported from another process and returns a device pointer usable in the local process.
+*/;
+
+@VERSION_11;
+CUresult
+cuIpcOpenMemHandle_v2 ( CUdeviceptr* pdptr, CUipcMemHandle handle, unsigned int  Flags );
 /*
 Opens an interprocess memory handle exported from another process and returns a device pointer usable in the local process.
 */;
@@ -1871,8 +1914,16 @@ cuGraphHostNodeSetParams ( CUgraphNode hNode, const CUDA_HOST_NODE_PARAMS* nodeP
 Sets a host node's parameters.
 */;
 
+@VERSION_10;
 CUresult
 cuGraphInstantiate ( CUgraphExec* phGraphExec, CUgraph hGraph, CUgraphNode* phErrorNode, char* logBuffer, size_t bufferSize );
+/*
+Creates an executable graph from a graph.
+*/;
+
+@VERSION_11;
+CUresult
+cuGraphInstantiate_v2 ( CUgraphExec* phGraphExec, CUgraph hGraph, CUgraphNode* phErrorNode, char* logBuffer, size_t bufferSize );
 /*
 Creates an executable graph from a graph.
 */;
