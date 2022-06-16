@@ -27,6 +27,7 @@
 #   python <THIS_FILE> generate-example.txt
 
 import sys
+import subprocess
 import os
 import re
 
@@ -246,10 +247,23 @@ def emit_wrapper(decl, ret_type, fnc, args, arg_vars, logging):
 
 # initial value
 logging = False
+skip_decl = False
+cuda_ver_str = re.findall(r"release \d+",
+                          subprocess.check_output(["nvcc", "--version"]))[0]
+cuda_ver = int(cuda_ver_str.split(" ")[1])
 
 for decl in declarations:
   # check for header file
   decl_oneline = re.sub('\n *', ' ', decl).strip()
+
+  # skip the current declaration if the skip_decl flag is set
+  if skip_decl:
+    if decl_oneline.startswith("@LogReplay"):
+      continue
+    skip_decl = False # unset
+    logging = False
+    continue
+
   if decl_oneline.startswith("#"):
     print(decl_oneline.rstrip(';'))
     continue
@@ -260,6 +274,12 @@ for decl in declarations:
 
   if decl_oneline.startswith("@LogReplay"):
     logging = True
+    continue
+
+  if decl_oneline.startswith("@VERSION"):
+    decl_ver = int(decl_oneline.split("_")[1])
+    if decl_ver != cuda_ver:
+      skip_decl = True
     continue
 
   if decl.rstrip()[-1] != ')':

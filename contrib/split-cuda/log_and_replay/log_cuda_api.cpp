@@ -994,6 +994,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
       chars_wrote += sizeof(handle);
       break;
     }
+#if CUDA_VERSION <= 10020
     case GENERATE_ENUM(cusparseCreateHybMat):
     {
       cusparseHybMat_t *handle = va_arg(arglist, cusparseHybMat_t *);
@@ -1024,6 +1025,7 @@ logAPI(Cuda_Fncs_t cuda_fnc_op, ...)
       chars_wrote += sizeof(info);
       break;
     }
+#endif
     case GENERATE_ENUM(cusolverDnCreate):
     {
       cusolverDnHandle_t *handle = va_arg(arglist, cusolverDnHandle_t *);

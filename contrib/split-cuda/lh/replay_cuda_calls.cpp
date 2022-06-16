@@ -980,6 +980,7 @@ void replayAPI(CudaCallLog_t *l)
       cusparseDestroyMatDescr(handle);
       break;
     }
+#if CUDA_VERSION <= 10020
     case GENERATE_ENUM(cusparseCreateHybMat):
     {
       cusparseHybMat_t *handle;
@@ -1012,6 +1013,7 @@ void replayAPI(CudaCallLog_t *l)
       cusparseDestroySolveAnalysisInfo(info);
       break;
     }
+#endif
     case GENERATE_ENUM(cusolverDnCreate):
     {
       cusolverDnHandle_t *handle;
