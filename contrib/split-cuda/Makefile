@@ -1,10 +1,14 @@
 # NOTE: Update the following variables for your system
-CC=/usr/bin/gcc-8
-CXX=/usr/bin/g++-8
-NVCC=/usr/local/cuda/bin/nvcc
+CC=gcc
+CXX=g++
+NVCC=nvcc
 LD=${CXX}
 RTLD_PATH=/lib64/ld-linux-x86-64.so.2
-CUDA_INCLUDE_PATH=/usr/local/cuda/include/
+ifeq ($(findstring cori,$(PLATFORM)),perlmutter)
+  CUDA_INCLUDE_PATH=${CRAY_CUDATOOLKIT_INCLUDE_OPTS}
+else
+  CUDA_INCLUDE_PATH=/usr/local/cuda/include/
+endif
 
 # The name will be the same as the current directory name.
 NAME=${shell basename $$PWD}
@@ -34,7 +38,7 @@ SPLIT_CUDA_INCLUDE_FLAGS=-I${DMTCP_ROOT}/contrib/split-cuda/common \
 			 -I${DMTCP_ROOT}/contrib/split-cuda/log_and_replay \
        -I${DMTCP_ROOT}/contrib/split-cuda/autogen
 
-INCLUDE_FLAGS=-I. -I${CUDA_INCLUDE_PATH} -I${DMTCP_INCLUDE} -I${JALIB_INCLUDE} \
+INCLUDE_FLAGS=-I. ${CUDA_INCLUDE_PATH} -I${DMTCP_INCLUDE} -I${JALIB_INCLUDE} \
               ${SPLIT_CUDA_INCLUDE_FLAGS}
 WARNING_FLAGS=-Wall -Wno-deprecated-declarations -Werror
 
