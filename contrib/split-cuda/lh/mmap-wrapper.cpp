@@ -48,7 +48,7 @@ using namespace std;
 #define MMAP_OFF_MASK (MMAP_OFF_HIGH_MASK | MMAP_OFF_LOW_MASK)
 #define _real_mmap mmap
 #define _real_munmap munmap
-#define UBUNTU 1
+// #define UBUNTU 1
 
 // TODO:
 //  1. Make the size of list dynamic

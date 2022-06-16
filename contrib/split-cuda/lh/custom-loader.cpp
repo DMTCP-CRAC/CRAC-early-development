@@ -37,7 +37,7 @@
 #include "kernel-loader.h"
 #include "trampoline_setup.h"
 
-#define UBUNTU 1
+// #define UBUNTU 1
 
 // Uses ELF Format.  For background, read both of:
 //  * http://www.skyfree.org/linux/references/ELF_Format.pdf
