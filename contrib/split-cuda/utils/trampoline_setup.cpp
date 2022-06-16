@@ -77,7 +77,7 @@ get_symbol_offset(int fd, const char *ldname, const char *symbol)
                    sect_hdr.sh_size, sizeof(strtab));
         assert(0);
       }
-      assert(sect_hdr.sh_size = read(fd2, strtab, sect_hdr.sh_size));
+      assert((sect_hdr.sh_size = read(fd2, strtab, sect_hdr.sh_size)));
       close(fd2);
     }
   }
