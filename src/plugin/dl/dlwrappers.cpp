@@ -68,9 +68,8 @@ extern "C"
 void *dlopen(const char *filename, int flag)
 {
   bool lockAcquired = dmtcp_libdlLockLock();
-  if (strstr(filename, "libcuda") != NULL) {
+  if (filename != NULL && strstr(filename, "libcuda") != NULL) {
     JWARNING(false) (filename) (flag);
-    // filename = "/home/twinkle/proj_rpc/cuda_backup/dmtcp-cuda-split/contrib/split-cuda/libcuda_wrappers.so";
     filename = NULL;
   }
   void *ret = _real_dlopen(filename, flag);
