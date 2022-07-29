@@ -1,0 +1,11 @@
+cuda_stub_lib/cuda_stub.cpp
+autogen/cuda_autogen_wrappers.cpp
+autogen/cuda_autogen_wrappers.h
+autogen/lower_half_cuda_if.h
+*.exe
+*.dummy.exe
+test/*.exe
+ckpt*.dmtcp
+dmtcp_restart_script*.sh
+*.so
+lhInfo*

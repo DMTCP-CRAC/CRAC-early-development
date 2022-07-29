@@ -4,10 +4,11 @@ CXX=g++
 NVCC=nvcc
 LD=${CXX}
 RTLD_PATH=/lib64/ld-linux-x86-64.so.2
-ifeq ($(findstring cori,$(PLATFORM)),perlmutter)
+
+ifeq ($(NERSC_HOST), perlmutter)
   CUDA_INCLUDE_PATH=${CRAY_CUDATOOLKIT_INCLUDE_OPTS}
 else
-  CUDA_INCLUDE_PATH=/usr/local/cuda/include/
+  CUDA_INCLUDE_PATH=-I/usr/local/cuda/include/
 endif
 
 # The name will be the same as the current directory name.
@@ -154,6 +155,6 @@ clean: tidy
 	      test/${TARGET_BIN} ${PLUGIN_LIB_OBJS} ${UTILITY_OBJS} \
 		  ${LIBNAME}.so GTAGS GRTAGS GPATH autogen/cuda_autogen_wrappers.cpp \
 		  autogen/cuda_autogen_wrappers.h autogen/lower_half_cuda_if.h \
-      lib${WRAPPER_LIB}.so ${WRAPPER_LIB_OBJS} cuda_stub.*
+      lib${WRAPPER_LIB}.so ${WRAPPER_LIB_OBJS} cuda_stub_lib/cuda_stub.cpp
 
 .PHONY: dist vi vim clean gdb tags tidy restart run enableASLR disableASLR check

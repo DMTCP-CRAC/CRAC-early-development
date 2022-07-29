@@ -249,7 +249,8 @@ def emit_wrapper(decl, ret_type, fnc, args, arg_vars, logging):
 logging = False
 skip_decl = False
 cuda_ver_str = re.findall(r"release \d+",
-                          subprocess.check_output(["nvcc", "--version"]))[0]
+                          subprocess.check_output(["nvcc", "--version"])
+                          .decode('utf-8'))[0]
 cuda_ver = int(cuda_ver_str.split(" ")[1])
 
 for decl in declarations:

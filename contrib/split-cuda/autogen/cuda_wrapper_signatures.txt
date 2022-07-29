@@ -2328,5 +2328,5 @@ Unregisters a graphics resource for access by CUDA.
 */;
 
 @LogReplay;
-void                                                                            
+void
 __cudaRegisterFatBinaryEnd(void **fatCubinHandle);
