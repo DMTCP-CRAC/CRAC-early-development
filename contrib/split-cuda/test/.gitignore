@@ -1,0 +1,10 @@
+a.out
+*.cuda*
+*.ii
+*_dlink.*
+*.fatbin*
+*.ptx
+*.cubin
+*.module_id
+ckpt*.dmtcp
+dmtcp_restart*.sh
