@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include <sys/resource.h>
+#include <sys/personality.h>
 #include "../jalib/jassert.h"
 #include "../jalib/jconvert.h"
 #include "../jalib/jfilesystem.h"
@@ -179,6 +180,7 @@ static bool enableIPCPlugin = true;
 static bool enableSvipcPlugin = true;
 static bool enablePathVirtPlugin = false;
 static bool enableTimerPlugin = true;
+static bool enableKernelLoader = false;
 
 #ifdef UNIQUE_CHECKPOINT_FILENAMES
 static bool enableUniqueCkptPlugin = true;
@@ -349,6 +351,16 @@ processArgs(int *orig_argc, const char ***orig_argv)
       shift;
     } else if (s == "--with-plugin") {
       setenv(ENV_VAR_PLUGIN, argv[1], 1);
+      shift; shift;
+    } else if (s == "--cuda") {
+      /* exec kernel loader with the environment variables */
+      enableKernelLoader = true;
+      shift;
+    } else if (s == "--kernel-loader") {
+      setenv(ENV_VAR_KERNEL_LOADER, argv[1], 1);
+      shift; shift;
+    } else if (s == "--target-ld") {
+      setenv(ENV_VAR_TARGET_LD, argv[1], 1);
       shift; shift;
     } else if (s == "-q" || s == "--quiet") {
       *getenv(ENV_VAR_QUIET) = *getenv(ENV_VAR_QUIET) + 1;
@@ -622,6 +634,19 @@ main(int argc, const char **argv)
   const char **newArgv = NULL;
   if (testScreen(argv, &newArgv)) {
     execvp(newArgv[0], (char* const*) newArgv);
+  } else if (enableKernelLoader) {
+    char * kernelLoaderPath = getenv(ENV_VAR_KERNEL_LOADER);
+    JASSERT (kernelLoaderPath != NULL)
+    .Text ("Kernel loader path is not set!");
+    vector <char *> newArgs;
+    newArgs.push_back(kernelLoaderPath);
+    for (int i = 0; i < argc; i++) {
+      printf("args: %s\n", argv[i]);
+      newArgs.push_back((char*)argv[i]);
+    }
+    newArgs.push_back(NULL);
+    personality(ADDR_NO_RANDOMIZE);
+    execvp(newArgs[0], &newArgs[0]);
   } else {
     execvp(argv[0], (char* const*) argv);
   }
@@ -839,6 +864,12 @@ setLDPreloadLibs(bool is32bitElf)
     preloadLibs32 = preloadLibs32 + ":" + getenv("LD_PRELOAD");
 #endif // if defined(__x86_64__) || defined(__aarch64__)
   }
+  if (enableKernelLoader) {
+    printf("UH_PRELOAD: %s \n", preloadLibs.c_str());
+    setenv("UH_PRELOAD", preloadLibs.c_str(), 1);
+  } else {
+    setenv("LD_PRELOAD", preloadLibs.c_str(), 1);
+  }
 
   setenv("LD_PRELOAD", preloadLibs.c_str(), 1);
 #if defined(__x86_64__) || defined(__aarch64__)
@@ -851,7 +882,11 @@ setLDPreloadLibs(bool is32bitElf)
           "  ./configure --enable-m32 && make clean && make -j && "
           "make install\n"
           "  ./configure && make clean && make -j && make install\n");
-    setenv("LD_PRELOAD", preloadLibs32.c_str(), 1);
+    if (enableKernelLoader) {
+      setenv("UH_PRELOAD", preloadLibs32.c_str(), 1);
+    } else {
+      setenv("LD_PRELOAD", preloadLibs32.c_str(), 1);
+    }
   }
 #endif // if defined(__x86_64__) || defined(__aarch64__)
   JTRACE("getting value of LD_PRELOAD")

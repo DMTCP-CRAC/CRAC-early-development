@@ -89,6 +89,11 @@
 #define ENV_VAR_QUIET               "DMTCP_QUIET"
 #define ENV_VAR_DMTCP_DUMMY         "DMTCP_DUMMY"
 
+// CUDA split related environment variable
+#define ENV_VAR_KERNEL_LOADER       "KERNEL_LOADER"
+#define ENV_VAR_TARGET_LD           "TARGET_LD"
+#define ENV_VAR_UH_PREDLOAD         "UH_PRELOAD"
+
 // Keep in sync with plugin/pid/pidwrappers.h
 #define ENV_VAR_VIRTUAL_PID         "DMTCP_VIRTUAL_PID"
 
