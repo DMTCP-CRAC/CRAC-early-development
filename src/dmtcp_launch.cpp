@@ -158,13 +158,6 @@ static const char *theUsage =
   HELP_AND_CONTACT_INFO
   "\n";
 
-// FIXME:  The warnings below should be collected into a single function,
-// and also called after a user exec(), not just in dmtcp_launch.
-// static const char* theExecFailedMsg =
-// "ERROR: Failed to exec(\"%s\"): %s\n"
-// "Perhaps it is not in your $PATH?\n"
-// "See `dmtcp_launch --help` for usage.\n"
-// ;
 
 static bool disableAllPlugins = false;
 static bool checkpointOpenFiles = false;
@@ -183,6 +176,9 @@ static bool enableIPCPlugin = true;
 static bool enableSvipcPlugin = true;
 static bool enablePathVirtPlugin = false;
 static bool enableTimerPlugin = true;
+
+static bool enableCudaPlugin = false;
+static bool enableMpiPlugin = false;
 
 #ifdef UNIQUE_CHECKPOINT_FILENAMES
 static bool enableUniqueCkptPlugin = true;
@@ -351,16 +347,20 @@ processArgs(int *orig_argc, const char ***orig_argv)
     } else if (s == "--with-plugin") {
       setenv(ENV_VAR_PLUGIN, argv[1], 1);
       shift; shift;
+    } else if (s == "--cuda") {
+      /* exec kernel loader with the environment variables */
+      enableCudaPlugin = true;
+      setenv(ENV_VAR_CUDA_PLUGIN, "1", 1);
+      shift;
+    } else if (s == "--mpi") {
+      enableMpiPlugin = true;
+      setenv(ENV_VAR_MPI_PLUGIN, "1", 1);
+      shift;
     } else if (s == "-q" || s == "--quiet") {
       *getenv(ENV_VAR_QUIET) = *getenv(ENV_VAR_QUIET) + 1;
 
       // Just in case a non-standard version of setenv is being used:
       setenv(ENV_VAR_QUIET, getenv(ENV_VAR_QUIET), 1);
-      shift;
-    } else if (s == "--mpi") {
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 11)
-      personality(ADDR_NO_RANDOMIZE);
-#endif
       shift;
     } else if ((s.length() > 2 && s.substr(0, 2) == "--") ||
                (s.length() > 1 && s.substr(0, 1) == "-")) {
@@ -614,6 +614,27 @@ main(int argc, const char **argv)
   const char **newArgv = NULL;
   if (testScreen(argv, &newArgv)) {
     execvp(newArgv[0], (char* const*) newArgv);
+  } else if (enableMpiPlugin || enableCudaPlugin) {
+    // kernel_loader should exist in bin folder along with other dmtcp binaries
+    char * kernelLoaderPath = Util::getPath("kernel_loader");
+    JASSERT (kernelLoaderPath != NULL)
+    .Text ("Kernel loader path is not set!");
+
+    vector <const char *> newArgs;
+    newArgs.push_back(kernelLoaderPath);
+    for (int i = 0; i < argc; i++) {
+      newArgs.push_back(argv[i]);
+    }
+    newArgs.push_back(NULL);
+
+    personality(ADDR_NO_RANDOMIZE);
+    // launch kernel loader
+    execvp(newArgs[0], (char* const*)&newArgs);
+    // should be unreachable
+    JASSERT_STDERR <<
+      "ERROR: Failed to exec(\"" << newArgs[0] << "\"): " << JASSERT_ERRNO
+                 << "\nPerhaps it is not in your $PATH?\n";
+    return -1;
   } else {
     execvp(argv[0], (char* const*) argv);
   }
@@ -623,9 +644,6 @@ main(int argc, const char **argv)
     "ERROR: Failed to exec(\"" << argv[0] << "\"): " << JASSERT_ERRNO << "\n"
                  << "Perhaps it is not in your $PATH?\n"
                  << "See `dmtcp_launch --help` for usage.\n";
-
-  // fprintf(stderr, theExecFailedMsg, argv[0], JASSERT_ERRNO);
-
   return -1;
 }
 
@@ -801,6 +819,15 @@ setLDPreloadLibs(bool is32bitElf)
     preloadLibs += getenv(ENV_VAR_PLUGIN);
     preloadLibs += ":";
   }
+  // add CUDA and MPI libraries ahead of everyone
+  if (enableCudaPlugin) {
+    preloadLibs += Util::getPath("libcrac.so", false);
+    preloadLibs += ":";
+  }
+  if (enableMpiPlugin) {
+    preloadLibs += Util::getPath("libmana.so", false);
+    preloadLibs += ":";
+  }
   string preloadLibs32 = preloadLibs;
 
   // set up Alloc plugin
@@ -862,8 +889,13 @@ setLDPreloadLibs(bool is32bitElf)
     preloadLibs32 = preloadLibs32 + ":" + getenv("LD_PRELOAD");
 #endif // if defined(__x86_64__) || defined(__aarch64__)
   }
-
-  setenv("LD_PRELOAD", preloadLibs.c_str(), 1);
+  // Do not set LD_PRELOAD for kernel loader
+  if (enableCudaPlugin || enableMpiPlugin) {
+    setenv("UH_PRELOAD", preloadLibs.c_str(), 1);
+    JTRACE("UH_PRELOAD") (preloadLibs);
+  } else {
+    setenv("LD_PRELOAD", preloadLibs.c_str(), 1);
+  }
 #if defined(__x86_64__) || defined(__aarch64__)
   if (is32bitElf) {
     string libdmtcp = Util::getPath("libdmtcp.so", true);
@@ -874,7 +906,12 @@ setLDPreloadLibs(bool is32bitElf)
           "  ./configure --enable-m32 && make clean && make -j && "
           "make install\n"
           "  ./configure && make clean && make -j && make install\n");
-    setenv("LD_PRELOAD", preloadLibs32.c_str(), 1);
+    // Do not set LD_PRELOAD for kernel loader
+    if (enableCudaPlugin || enableMpiPlugin) {
+      setenv("UH_PRELOAD", preloadLibs32.c_str(), 1);
+    } else {
+      setenv("LD_PRELOAD", preloadLibs32.c_str(), 1);
+    }
   }
 #endif // if defined(__x86_64__) || defined(__aarch64__)
   JTRACE("getting value of LD_PRELOAD")
