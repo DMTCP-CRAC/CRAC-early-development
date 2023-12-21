@@ -1,0 +1,4 @@
+[submodule "contrib/split-process/mana"]
+	path = contrib/split-process/mana
+	url = https://github.com/mpickpt/mana.git
+	branch = dev/jaintwinkle/two-lhs
