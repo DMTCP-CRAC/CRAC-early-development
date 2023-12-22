@@ -1,0 +1,6 @@
+*.out
+*.exe
+core
+*.json
+*.dmtcp
+dmtcp_restart*.sh
